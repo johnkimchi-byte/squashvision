@@ -17,18 +17,40 @@ Four features, from the shot instant plus the striker's recent track:
   depth_short   -- shot depth relative to the short line (metres; +back)
   interval_norm -- time since the previous shot in the rally, normalised by
                    that rally's median inter-shot interval; a volley takes
-                   time away from the opponent, so this runs low
+                   time away from the opponent, so this runs low.
+                   **Contributes nothing on the shipped path** -- see below
   radial_v      -- rate of change of the striker's distance from the T over
                    REACH_WINDOW of history; negative means they were not
                    travelling outward when they struck
   out_reach     -- how far above their recent minimum that distance sits: how
                    far out they came to reach this ball
 
-`radial_v` and `out_reach` describe the *shape* of the excursion, which is
-the quantity `shots.MIN_PROMINENCE` currently spends on rejecting candidates.
-Measured on 117 hand-marked shots (14 volleys) they are the two strongest
-predictors available -- point-biserial -0.391 and -0.369, against -0.245 for
-depth_short and -0.256 for interval_norm.
+Point-biserial against the volley label, measured twice: on 117 hand-marked
+shots (14 volleys), and on the detected shots this command actually runs on.
+Quote the right column -- they are not the same feature set in practice.
+
+                     hand instants   detected instants
+    radial_v            -0.391            -0.239
+    out_reach           -0.369            -0.215
+    depth_short         -0.245            -0.274
+    interval_norm       -0.256            +0.038
+
+`radial_v` and `out_reach` describe the *shape* of the excursion -- the
+quantity `shots.MIN_PROMINENCE` spends on rejecting candidates rather than on
+describing them -- and are the strongest predictors available.  They come from
+the continuous tracks, so no missing shot can break them; they still lose
+~40% of their signal to an instant landing up to MARK_TOLERANCE away from the
+real strike, which is why the two columns differ for them at all.
+
+**`interval_norm` earns nothing here and is kept deliberately.**  It is the
+one feature computed across two *detected* shots, and `shots.py` misses 43%
+of them, so a missed predecessor roughly doubles it: the detected series sits
+at mean 1.396, sd 1.900 where a median-normalised interval must centre on 1.0
+(hand marks: 1.052, sd 0.328).  It is retained because the signal is real and
+recoverable -- level with `depth_short` on clean instants -- and returns as
+soon as shot timing improves.  Do not read its hand-instant figure as a
+current contribution, and do not drop it as dead without re-measuring both
+columns.  See `HANDOFF_4_shot_type.md` S3.
 
 Two features were dropped on measurement, not taste.  `depth_median` (depth
 against the rally's own median) correlates with `depth_short` at r = 0.97,
