@@ -86,7 +86,8 @@ favourably. Stride 1 only where temporal resolution is the actual constraint.
 ## Closed decisions — do not reopen without new evidence
 
 - **Ball tracking** — tried, resolved 0/14 labelled impacts. A ball is four pixels
-  across; so is compression noise. Not a tuning problem.
+  across; so is compression noise. Not a tuning problem — reopening it needs new
+  footage (higher resolution, or a purpose-placed camera), not new code.
 - **Audio** — arena crowd noise buries the impacts on broadcast encodes.
 - **Silhouette height as a volley feature** — measured. Noise vs a 2 s baseline is
   ~11% at every stride, and at the 0.2–0.3 s reach timescale the p75 exceeds the
@@ -94,6 +95,11 @@ favourably. Stride 1 only where temporal resolution is the actual constraint.
 - **The `serve_bonus` formation term** — looked good in-sample (F1 0.92 vs 0.79),
   reversed under held-out scoring (0.85 vs 0.71). Defaults to off. The knob exists;
   do not turn it on because it looks better on the training points.
+- **Inter-shot adjacency features** — anything that is a difference between two
+  *detected* shots (`destination = the next shot's position`, `interval = gap to the
+  next detected shot`). Rejected on the contamination below, not on how it scores.
+  `fit/volleys.py`'s `interval_norm` is the existing instance, and is why that
+  module is not the base for shot-type work.
 
 ## Gotchas that bite
 
@@ -114,6 +120,16 @@ favourably. Stride 1 only where temporal resolution is the actual constraint.
 - **A player who stops moving disappears.** Background subtraction only sees what
   moved. This explains `loitering()`, the `IDENTITY_MEMORY` averaging, and most
   coasted detections. It is the detector's central weakness.
+- **Anything computed across two rows of `shots.csv` is contaminated.** Shot timing
+  is precision 0.67 / recall 0.57 at tolerance 1.0 s, and a miss does not blank a
+  row — it splices two non-adjacent shots into an apparent adjacency, giving a
+  destination one shot too far downstream and a doubled interval, with nothing
+  raised. The misses are also *label-correlated*: `MIN_PROMINENCE` and
+  `MIN_SHOT_GAP` discard small brief excursions, which are volleys, counter-drops
+  and tight front-court exchanges. And `find_shots`'s out-of-turn drop means one
+  miss costs two **adjacent** shots. Estimated one row in four carries correct
+  cross-row features. Build features from one instant plus the continuous tracks
+  instead. See `HANDOFF_4_shot_type.md` S3.
 - **Disputed number:** both-players-resolved at stride 4 appears in the record as
   both 65% and 78% — probably measured through different pipeline stages
   (`P.summarise()` counts raw per-frame slots; `cli.analyse_in_court` reports after
@@ -128,3 +144,6 @@ favourably. Stride 1 only where temporal resolution is the actual constraint.
 - `HANDOFF_3_segmentation.md` — **deferred**. Swapping background subtraction for
   instance segmentation, with a go/no-go gate. Read its S0 preconditions before
   starting any of it.
+- `HANDOFF_4_shot_type.md` — **gated, not started**. Shot-type classification,
+  and the feature contamination that blocks it. Its S0.4 precondition (a second
+  shot-capable recording) is not currently met.
