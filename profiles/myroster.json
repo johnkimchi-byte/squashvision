@@ -1,0 +1,149 @@
+{
+  "video": "C:\\Users\\John_\\Downloads\\Court 4 public\u29f8Bates  vs. Connecticut , Bates  vs. Connecticut - Trim.mp4",
+  "roi": [
+    0.134,
+    0.138,
+    0.944,
+    0.992
+  ],
+  "players": [
+    {
+      "slot": 0,
+      "name": "Arman",
+      "shirt": [
+        153,
+        126,
+        117
+      ],
+      "rgb": [
+        130,
+        146,
+        164
+      ],
+      "samples": [
+        [
+          127,
+          126,
+          108
+        ],
+        [
+          154,
+          128,
+          119
+        ],
+        [
+          152,
+          127,
+          116
+        ],
+        [
+          158,
+          126,
+          120
+        ]
+      ],
+      "heights": [
+        0.2727,
+        0.5281,
+        0.1732,
+        0.1602
+      ],
+      "spread": 4.4
+    },
+    {
+      "slot": 1,
+      "name": "John",
+      "shirt": [
+        132,
+        129,
+        113
+      ],
+      "rgb": [
+        111,
+        124,
+        149
+      ],
+      "samples": [
+        [
+          132,
+          128,
+          111
+        ],
+        [
+          131,
+          129,
+          112
+        ],
+        [
+          116,
+          129,
+          113
+        ],
+        [
+          117,
+          129,
+          114
+        ],
+        [
+          135,
+          129,
+          114
+        ],
+        [
+          146,
+          128,
+          114
+        ],
+        [
+          134,
+          127,
+          109
+        ]
+      ],
+      "heights": [
+        0.381,
+        0.381,
+        0.2814,
+        0.2078,
+        0.368,
+        0.3203,
+        0.4069
+      ],
+      "spread": 4.9
+    }
+  ],
+  "ignore": [
+    {
+      "box": [
+        0.072,
+        0.632,
+        0.1928,
+        1.0
+      ],
+      "height": 0.3333,
+      "relative": 0.875
+    },
+    {
+      "box": [
+        0.5527,
+        0.7403,
+        0.7352,
+        1.0
+      ],
+      "height": 0.2251,
+      "relative": 0.591
+    },
+    {
+      "box": [
+        0.144,
+        0.619,
+        0.3265,
+        1.0
+      ],
+      "height": 0.3463,
+      "relative": 0.909
+    }
+  ],
+  "separation": 21.6,
+  "note": "Shirt colours are median Lab over the clicked samples, in the analysis ROI. Ignore boxes are ROI fractions: nothing inside one is ever treated as a player."
+}

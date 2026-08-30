@@ -1,0 +1,19 @@
+{
+  "video": "C:/Users/John_/Downloads/Court 4 public\u29f8Bates  vs. Connecticut , Bates  vs. Connecticut - Trim.mp4",
+  "detection": {
+    "DIFF_THRESHOLD": 18,
+    "PLAYER_MIN_AREA": 300.0,
+    "PLAYER_MAX_AREA": 1900.0,
+    "PLAYER_MIN_HEIGHT": 35
+  },
+  "searched": [
+    "DIFF_THRESHOLD",
+    "PLAYER_MIN_AREA",
+    "PLAYER_MIN_HEIGHT"
+  ],
+  "fit": {
+    "both_players_observed": 0.651,
+    "both_players_observed_with_defaults": 0.0
+  },
+  "note": "Detection settings only. The court calibration is separate and transfers between recordings of the same camera. Keys outside `searched` were not fitted; they record the defaults this fit ran against, so the profile means the same thing later as it did here."
+}

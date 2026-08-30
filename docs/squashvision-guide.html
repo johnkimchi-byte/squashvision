@@ -1,0 +1,1444 @@
+<title>The Squashvision Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ground:   #EDF0F2;
+    --surface:  #FFFFFF;
+    --sunken:   #E2E7EA;
+    --ink:      #131A1F;
+    --muted:    #5C6873;
+    --hair:     #C7D0D6;
+    --court:    #9E2B32;
+    --p0:       #B37700;
+    --p1:       #2F6FBF;
+    --p0-fill:  #F6E3B4;
+    --p1-fill:  #CFE0F5;
+    --shadow:   0 1px 2px rgba(19,26,31,.06), 0 8px 24px rgba(19,26,31,.05);
+
+    --measure: 67ch;
+    --wide: 1060px;
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:  #0F151A;
+      --surface: #161E25;
+      --sunken:  #1D262E;
+      --ink:     #E6EBEF;
+      --muted:   #94A2AD;
+      --hair:    #2E3A44;
+      --court:   #DE7078;
+      --p0:      #F0C24A;
+      --p1:      #6FB2FF;
+      --p0-fill: #3A3116;
+      --p1-fill: #16283D;
+      --shadow:  0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:  #0F151A;
+    --surface: #161E25;
+    --sunken:  #1D262E;
+    --ink:     #E6EBEF;
+    --muted:   #94A2AD;
+    --hair:    #2E3A44;
+    --court:   #DE7078;
+    --p0:      #F0C24A;
+    --p1:      #6FB2FF;
+    --p0-fill: #3A3116;
+    --p1-fill: #16283D;
+    --shadow:  0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.32);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: var(--wide); margin: 0 auto; padding: 0 28px 96px; }
+  .col  { max-width: var(--measure); }
+
+  /* ---------- masthead ---------- */
+  .masthead { padding: 72px 0 40px; border-bottom: 2px solid var(--court); }
+  .eyebrow {
+    font-family: var(--display); font-weight: 600; font-size: 11px;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--court);
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--display); font-weight: 700; font-size: clamp(38px, 6vw, 62px);
+    line-height: 1.02; letter-spacing: -.022em; margin: 0 0 20px;
+    text-wrap: balance;
+  }
+  .standfirst { font-size: 19px; color: var(--muted); margin: 0; max-width: 58ch; }
+
+  .contents {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 0; margin: 36px 0 0; padding: 20px 0 0; border-top: 1px solid var(--hair);
+    list-style: none;
+  }
+  .contents li { padding: 6px 20px 6px 0; }
+  .contents a {
+    font-family: var(--display); font-size: 13.5px; font-weight: 500;
+    color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent;
+  }
+  .contents a:hover, .contents a:focus-visible { border-bottom-color: var(--court); }
+  .contents .num {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    margin-right: 8px;
+  }
+
+  /* ---------- part dividers ---------- */
+  .part {
+    margin: 84px 0 12px; padding-top: 26px; border-top: 2px solid var(--court);
+  }
+  .part-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--court); margin: 0 0 10px;
+  }
+  .part h2 {
+    font-family: var(--display); font-weight: 700; font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.08; letter-spacing: -.018em; margin: 0 0 12px; text-wrap: balance;
+  }
+  .part p { color: var(--muted); max-width: 60ch; margin: 0; }
+
+  h3 {
+    font-family: var(--display); font-weight: 600; font-size: 23px;
+    letter-spacing: -.012em; line-height: 1.25; margin: 52px 0 14px;
+    text-wrap: balance;
+  }
+  h4 {
+    font-family: var(--display); font-weight: 600; font-size: 16px;
+    letter-spacing: .002em; margin: 30px 0 8px;
+  }
+
+  /* numbered steps — Part 1 is a real sequence */
+  .step { display: grid; grid-template-columns: 46px 1fr; gap: 18px; margin: 46px 0 0; }
+  .step-n {
+    font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--court);
+    padding-top: 9px; border-top: 2px solid var(--court);
+  }
+  .step-body { min-width: 0; }
+  .step-body > h3 { margin-top: 0; }
+
+  p { margin: 0 0 16px; }
+  a { color: var(--court); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+  ul, ol { margin: 0 0 16px; padding-left: 22px; }
+  li { margin-bottom: 7px; }
+
+  code {
+    font-family: var(--mono); font-size: .855em;
+    background: var(--sunken); padding: 1px 5px; border-radius: 3px;
+  }
+  pre {
+    font-family: var(--mono); font-size: 13px; line-height: 1.6;
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--hair); border-left: 3px solid var(--court);
+    border-radius: 4px; padding: 16px 18px; margin: 0 0 18px;
+    box-shadow: var(--shadow);
+    /* Commands are one line each so there is no continuation character to get
+       wrong; wrap them visually rather than scrolling, so none is hidden. */
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  pre .c { color: var(--muted); }
+
+  .note {
+    background: var(--surface); border: 1px solid var(--hair);
+    border-left: 3px solid var(--p1);
+    border-radius: 4px; padding: 14px 18px; margin: 0 0 18px; font-size: 15.5px;
+  }
+  .note strong { font-family: var(--display); font-weight: 600; }
+  .note.warn { border-left-color: var(--court); }
+
+  /* ---------- tables ---------- */
+  .scroll { overflow-x: auto; margin: 0 0 22px; }
+  table {
+    border-collapse: collapse; width: 100%; font-size: 14.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    text-align: left; padding: 9px 14px 9px 0; border-bottom: 1px solid var(--hair);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--display); font-weight: 600; font-size: 11.5px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--ink);
+  }
+  td code { white-space: nowrap; }
+  td.num { text-align: right; padding-right: 22px; }
+
+  /* ---------- figures ---------- */
+  figure {
+    margin: 34px 0; padding: 22px 22px 16px; background: var(--surface);
+    border: 1px solid var(--hair); border-radius: 5px; box-shadow: var(--shadow);
+  }
+  figure svg { display: block; width: 100%; height: auto; color: var(--ink); }
+  figcaption {
+    margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hair);
+    font-size: 14px; color: var(--muted); max-width: 70ch;
+  }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  .fig-wide { max-width: var(--wide); }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 10px 0 0;
+    font-family: var(--display); font-size: 12px; color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .chip { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+
+  hr {
+    border: 0; border-top: 1px solid var(--hair); margin: 46px 0;
+  }
+
+  .kbd {
+    font-family: var(--mono); font-size: 12px; border: 1px solid var(--hair);
+    border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px;
+    background: var(--surface);
+  }
+
+  footer {
+    margin-top: 80px; padding-top: 24px; border-top: 2px solid var(--court);
+    font-size: 14px; color: var(--muted);
+  }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .page { padding: 0 18px 64px; }
+    .step { grid-template-columns: 1fr; gap: 6px; }
+    .step-n { border-top: none; padding-top: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Squash court video analysis · Windows · Python + OpenCV, CPU only</p>
+    <h1>The Squashvision Manual</h1>
+    <p class="standfirst">
+      How to point this thing at a match video and get positions out of it — and,
+      after that, how it actually works and why it is built the way it is.
+      Commands are written for Windows PowerShell.
+    </p>
+    <ul class="contents">
+      <li><a href="#part1"><span class="num">Part 1</span>Using the tool</a></li>
+      <li><a href="#part2"><span class="num">Part 2</span>How it works</a></li>
+      <li><a href="#commands"><span class="num">Ref</span>Every command</a></li>
+      <li><a href="#pipeline"><span class="num">Fig 1</span>The pipeline</a></li>
+      <li><a href="#detection"><span class="num">Fig 2</span>Finding bodies</a></li>
+      <li><a href="#identity"><span class="num">Fig 3</span>Keeping identity</a></li>
+      <li><a href="#floor"><span class="num">Fig 4</span>Onto the floor</a></li>
+      <li><a href="#layout"><span class="num">Fig 5</span>Module map</a></li>
+    </ul>
+  </header>
+
+  <!-- ============================ PART ONE ============================ -->
+
+  <section class="part" id="part1">
+    <p class="part-label">Part one</p>
+    <h2>Using the tool</h2>
+    <p>
+      Written for someone who has never opened the code. You need a match video, a
+      PowerShell window, and about twenty minutes the first time. After that a new
+      match takes two or three.
+    </p>
+  </section>
+
+  <div class="col">
+    <h3>What it does, in one paragraph</h3>
+    <p>
+      You give it a video of a squash match shot from a fixed camera behind the court.
+      It finds the two players in every frame, follows them, works out where their feet
+      are on the actual floor in metres, and can then split the match into rallies. It
+      writes annotated videos you can watch to check it, and CSV files you can put in a
+      spreadsheet. It runs on an ordinary laptop CPU — there is no GPU and no neural
+      network anywhere in it.
+    </p>
+
+    <div class="note">
+      <strong>What it does not do.</strong> It does not track the ball — that was tried and
+      it failed on real footage. It does not tell you who won a point from the play
+      itself; when it needs to know, it reads the broadcast scoreboard. And it will not
+      guess a player's name: you tell it.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body col">
+      <h3>Set it up, once</h3>
+
+      <h4>0 · Get a PowerShell window pointed at the project</h4>
+      <p>
+        Press <span class="kbd">Win</span> and type <em>PowerShell</em>, then open it.
+        It starts in your home folder, so move it to the project — open the project
+        folder in File Explorer, click once in the address bar to select the path, copy
+        it, and type <code>cd</code> followed by that path in quotes:
+      </p>
+<pre><code>cd "C:\Users\you\PycharmProjects\PythonProject"</code></pre>
+      <p>Check you have landed in the right place:</p>
+<pre><code>dir</code></pre>
+      <p>
+        The listing must include <code>squashvision</code>. If it does not, you are in the
+        wrong folder and every command below will fail with <em>not recognized</em>.
+      </p>
+      <div class="note warn">
+        <strong>It has to be PowerShell.</strong> Not Command Prompt, and not Git Bash —
+        including the terminal tab inside PyCharm, which is often set to one of those.
+        If you are unsure which you have, run <code>$PSVersionTable</code>: PowerShell
+        prints a table, the others print an error or nothing useful. In PyCharm you can
+        switch it under <em>Settings → Tools → Terminal → Shell path</em>, or just use a
+        separate PowerShell window.
+      </div>
+
+      <p>Then four commands, in order.</p>
+
+      <h4>1 · Check Python is installed</h4>
+<pre><code>py --version</code></pre>
+      <p>
+        You want 3.10 or newer. If it says <em>py is not recognized</em>, install Python
+        from <a href="https://www.python.org/downloads/">python.org</a> — and on the first
+        screen of the installer tick <strong>Add python.exe to PATH</strong>. Then close
+        PowerShell, open it again, and retry.
+      </p>
+
+      <h4>2 · Make the project its own Python</h4>
+      <p>
+        This creates a <code>.venv/</code> folder holding a private copy of Python, so the
+        libraries this tool needs cannot collide with anything else on your machine.
+      </p>
+<pre><code>py -m venv .venv</code></pre>
+      <p>
+        It prints nothing and takes a few seconds. Safe to run again — if
+        <code>.venv/</code> already exists it just refreshes it.
+      </p>
+
+      <h4>3 · Install the two libraries</h4>
+<pre><code>./.venv/Scripts/python.exe -m pip install numpy opencv-python</code></pre>
+      <p>
+        About 60 MB of download. It should end with
+        <em>Successfully installed numpy… opencv-python…</em>. If it instead says
+        <em>Requirement already satisfied</em>, they were there already and you are fine.
+      </p>
+
+      <h4>4 · Check it runs</h4>
+<pre><code>./.venv/Scripts/python.exe -m squashvision</code></pre>
+      <p>
+        That prints the list of commands. Every command in this guide starts the same
+        way, followed by a command name, and every one accepts <code>--help</code>.
+      </p>
+
+      <div class="note warn">
+        <strong>Two different words for Python, and they are not interchangeable.</strong>
+        <code>py</code> is the launcher that comes with Windows Python — use it only for
+        step 2, before the environment exists. After that, always
+        <code>./.venv/Scripts/python.exe</code>, which is the copy that has the libraries.
+        Plain <code>python</code> is the one word to avoid: on a stock Windows install it
+        opens the Microsoft Store instead of running anything.
+      </div>
+      <div class="note">
+        <strong>Tired of typing that?</strong> Once per PowerShell window you can switch
+        to the short form:
+<pre><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+./.venv/Scripts/Activate.ps1</code></pre>
+        After that <code>python -m squashvision …</code> works on its own. The first line
+        is needed because Windows blocks scripts by default; <code>-Scope Process</code>
+        means it applies only to this window and changes nothing permanently. If you skip
+        this, just use the long form everywhere below.
+      </div>
+      <div class="note">
+        <strong>Every command below is a single line.</strong> Some are long and will
+        wrap on screen; select the whole block and paste it in one go. There is no
+        line-continuation character to get wrong.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body col">
+      <h3>Point it at your video</h3>
+      <p>
+        Nothing is copied or converted. You pass the path to your file every time.
+        Always put quotes around it — match filenames usually contain spaces. Start by
+        rendering twenty seconds and looking at the result:
+      </p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision demo "C:\videos\match.mp4" --start 300 --duration 20 --out output/demo.mp4</code></pre>
+      <p>
+        <code>--start 300</code> means "begin five minutes in". Pick a moment when a rally
+        is actually happening. Then open the result:
+      </p>
+<pre><code>start output/demo.mp4</code></pre>
+      <p>You will see two coloured boxes following the players.</p>
+      <div class="note">
+        <strong>Getting the path right.</strong> The quickest way is to find the video in
+        File Explorer, hold <span class="kbd">Shift</span>, right-click it, and choose
+        <strong>Copy as path</strong> — that puts the full quoted path on your clipboard,
+        ready to paste.
+      </div>
+      <p>
+        It will probably be wrong the first time on a new camera. That is expected, and
+        the next three steps are how you fix it.
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body col">
+      <h3>Teach it your court — once per camera angle</h3>
+      <p>
+        The tool needs to know where the court floor is in the picture so it can convert
+        pixels into metres. You do that by clicking on the painted lines:
+      </p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision calibrate "C:\videos\match.mp4" --out profiles/mycourt.json</code></pre>
+      <p>
+        A window opens showing the court with the players removed. It asks for one
+        landmark at a time — the front-left corner, the short line, the service boxes.
+        Click near the mark to zoom in, then click again precisely. Once four are placed
+        it draws the fitted court back over the picture, so a bad click shows up
+        immediately as lines that do not sit on the paint.
+      </p>
+      <p>
+        Keys: <span class="kbd">u</span> undo · <span class="kbd">s</span> skip a landmark
+        · <span class="kbd">w</span> write and quit · <span class="kbd">q</span> quit.
+      </p>
+      <div class="note">
+        <strong>Aim for under 20 cm.</strong> The banner shows the fit error in centimetres.
+        Anything under about 20 cm is good. This file works for every video from the same
+        camera in the same position, so you only do this once per venue.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body col">
+      <h3>Fit the detection settings — once per camera <em>and</em> encode</h3>
+      <p>
+        How strongly a player stands out from the floor depends on the lighting, the
+        video compression, and what they are wearing. A white shirt on a pale court is a
+        much weaker signal than a navy one. This searches for settings that work:
+      </p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision autotune "C:\videos\match.mp4" --out profiles/myprofile.json</code></pre>
+      <p>
+        It takes a few minutes. It samples several windows spread through the match,
+        tries a grid of settings on each, and keeps whichever lets the tracker
+        <em>observe</em> both players most often. It prints the top few so you can see
+        how much difference it made.
+      </p>
+      <div class="note warn">
+        <strong>This file does not transfer.</strong> The court calibration from step 3 works
+        on any recording from that camera. The detection profile does not — a
+        re-encode of the same broadcast at a different resolution needs its own. Re-run
+        autotune whenever the file changes.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body col">
+      <h3>Say who the players are</h3>
+      <p>
+        This is the step that matters most, and it is the one only a person can do. An
+        arena camera sees spectators standing at the glass who are the same size as a
+        player on court — bigger, sometimes, because they are closer to the lens. The
+        tool cannot tell them apart from the players on its own.
+      </p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision roster "C:\videos\match.mp4" --profile profiles/myprofile.json --names "Smith,Jones" --out profiles/myroster.json</code></pre>
+      <div class="note">
+        <strong>Pass the same <code>--profile</code> you will run with.</strong> The boxes
+        offered for clicking are the boxes detection actually produces, and they change
+        with those settings. Without it you will be clicking on the wrong things.
+      </div>
+      <p>A window opens on the court with a yellow box around everything it can see. Then:</p>
+      <ul>
+        <li>Click a player, press <span class="kbd">1</span> or <span class="kbd">2</span> to say which one he is.</li>
+        <li>Do that again at four or five different places around the court — front, back, both sides. The light changes a lot between the front wall and the back corner, and the tool stores the median of what you clicked.</li>
+        <li>Click anyone who is <em>not</em> playing — a spectator, a referee, someone walking past — and press <span class="kbd">x</span>. That fences them off.</li>
+        <li><span class="kbd">w</span> writes the file. <span class="kbd">u</span> undoes the last thing.</li>
+      </ul>
+      <p>
+        Scrub with <span class="kbd">space</span>, the <span class="kbd">←</span>
+        <span class="kbd">→</span> arrows (2 s), and <span class="kbd">[</span>
+        <span class="kbd">]</span> (15 s).
+      </p>
+      <h4>Two things to watch in the banner</h4>
+      <p>
+        <strong>"shirts N apart".</strong> This is how different the two players' shirts
+        are, against how much one player's own shirt varies from click to click. If the
+        gap is not comfortably bigger than the variation, the banner says so — their kit
+        is too similar for colour to separate them, and more clicking will not help.
+      </p>
+      <p>
+        <strong>"player-sized" warnings.</strong> If you fence something that is nearly as
+        tall as the players beside it, the banner warns you in red. You have probably
+        clicked a player by mistake, and that fence will delete him whenever he stands
+        there. Press <span class="kbd">u</span>.
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body col">
+      <h3>Run it again and check</h3>
+      <p>Now pass all three files every time:</p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision demo "C:\videos\match.mp4" --start 300 --duration 20 --profile profiles/myprofile.json --roster  profiles/myroster.json --out output/demo.mp4</code></pre>
+      <p>Watch it again. What you are looking for:</p>
+      <ul>
+        <li>Each box stays on the same player for the whole clip, and the names are the right way round.</li>
+        <li>Nothing is boxed that is not a player.</li>
+        <li>Where the tool is not sure, it says <code>lost</code> or draws corner ticks rather than a solid box — that is the honest answer, not a failure.</li>
+      </ul>
+      <p>
+        On the Bates vs Connecticut match this took the frames where both players were
+        resolved from <strong>74% to 89%</strong> on one held-out five-minute span and
+        <strong>76% to 91%</strong> on another.
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body col">
+      <h3>Get the numbers out</h3>
+      <p>Positions on the actual floor, beside the camera view:</p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision birdseye "C:\videos\match.mp4" --start 300 --duration 20 --profile profiles/myprofile.json --roster profiles/myroster.json --calibration profiles/mycourt.json --out output/plan.mp4</code></pre>
+      <p>
+        That prints metres covered, average position, how much of the time each player
+        spent in the front half, and their peak speed — which is the honest check on the
+        smoothing. A squash player sprints at about 7 m/s. If it reads 30, the path is
+        noise, not movement.
+      </p>
+      <p>A CSV of every frame instead:</p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision track "C:\videos\match.mp4" --profile profiles/myprofile.json --roster profiles/myroster.json --csv output/positions.csv</code></pre>
+      <p>
+        One row per analysed frame: time, both players' positions, how big they were,
+        their shirt colour, and — importantly — whether each position was
+        <em>measured</em> or coasted through a gap by the motion model.
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body col">
+      <h3>Optional: rallies</h3>
+      <p>Split play into rallies and check the result against the broadcast scoreboard:</p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision rallies "C:\videos\match.mp4" --profile profiles/myprofile.json --roster profiles/myroster.json --calibration profiles/mycourt.json --scoreboard</code></pre>
+      <p>
+        The scoreboard is free ground truth — it changes exactly once per point. You can
+        also fit the rally detector's own settings on it, scored on parts of the match
+        it was not fitted to:
+      </p>
+<pre><code>./.venv/Scripts/python.exe -m squashvision train "C:\videos\match.mp4" --calibration profiles/mycourt.json --out profiles/rally_config.json</code></pre>
+      <div class="note warn">
+        <strong>The score box is hard-coded to one broadcast.</strong> A different
+        production draws its scoreboard somewhere else, and these two commands will find
+        nothing. Check with <code>./.venv/Scripts/python.exe -m squashvision scoreboard VIDEO</code> before
+        relying on them.
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <h3 id="troubleshooting">When it goes wrong</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th style="width:38%">What you see</th><th>What it usually is</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>The Microsoft Store opens</td>
+            <td>You typed <code>python</code>. Windows ships a placeholder that does that. Use <code>./.venv/Scripts/python.exe</code> instead.</td>
+          </tr>
+          <tr>
+            <td>"running scripts is disabled on this system"</td>
+            <td>Only happens if you tried to activate the environment. Run <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code> first, or skip activation and use the full path.</td>
+          </tr>
+          <tr>
+            <td>"The term <code>./.venv/Scripts/python.exe</code> is not recognized"</td>
+            <td>Almost always that <code>.venv/</code> does not exist yet — go back and run <code>py -m venv .venv</code>. Otherwise you are in the wrong folder: run <code>dir</code> and check you can see <code>squashvision</code> in the listing.</td>
+          </tr>
+          <tr>
+            <td><code>..venvScriptspython.exe: command not found</code></td>
+            <td>The slashes have vanished from the path, which means you are in Git Bash or WSL rather than PowerShell — very often PyCharm's terminal tab, which is frequently set to one of those. Open a real PowerShell window instead.</td>
+          </tr>
+          <tr>
+            <td>"The term <code>.venv/Scripts/python.exe</code> is not recognized"</td>
+            <td>Note the missing <code>./</code> at the front. PowerShell will not run a program in the current folder without it.</td>
+          </tr>
+          <tr>
+            <td>"py is not recognized"</td>
+            <td>Python is not installed. Get it from python.org and tick <strong>Add python.exe to PATH</strong> in the installer, then reopen PowerShell.</td>
+          </tr>
+          <tr>
+            <td><code>ModuleNotFoundError: No module named 'cv2'</code></td>
+            <td>The libraries went into a different Python than the one you are running. Re-run the install line exactly as written — it must start <code>./.venv/Scripts/python.exe -m pip</code>, not <code>pip</code>.</td>
+          </tr>
+          <tr>
+            <td>Only part of a command runs</td>
+            <td>You pasted half a wrapped line. Each block here is one line however many rows it takes up on screen — select the whole block.</td>
+          </tr>
+          <tr>
+            <td>"cannot open C:\videos\match.mp4"</td>
+            <td>Usually an unquoted path with a space in it. Shift + right-click the file in Explorer → <strong>Copy as path</strong> and paste that.</td>
+          </tr>
+          <tr>
+            <td>A box on a spectator</td>
+            <td>They have not been fenced. Re-run <code>roster --edit profiles/myroster.json</code>, find them, press <span class="kbd">x</span>.</td>
+          </tr>
+          <tr>
+            <td>"seeding declined N frames…"</td>
+            <td>Normal in small numbers — it waited for a frame where both players were recognisable. If it is dozens, the roster does not describe what is on screen: usually you are analysing a knock-up rather than play, or the roster was sampled from a different part of the match.</td>
+          </tr>
+          <tr>
+            <td>A whole span reports ~70% and hundreds of seeding waits</td>
+            <td>Check what is actually on screen at that time. On the Connecticut match t=900–1200 s looks broken until you look: the score reads 11–5, the game has ended, and the court is empty with people milling in front of the glass. The tracker is right to claim nothing. Run <code>play</code> to find and discard those stretches.</td>
+          </tr>
+          <tr>
+            <td>Chaos in the first minute</td>
+            <td>That is usually the warm-up, not the match. Extra people are on and around the court, the players move slowly enough to half-vanish into the background, and the merge rate roughly doubles. Use <code>--start</code> to begin after the knock-up.</td>
+          </tr>
+          <tr>
+            <td>The names are swapped</td>
+            <td>Give the roster more colour samples from around the court. If the banner says the shirts are too alike, colour genuinely cannot separate these two.</td>
+          </tr>
+          <tr>
+            <td>A player vanishes in a corner</td>
+            <td>Usually a fence that is catching him. Run <code>roster --show</code> and look for one marked player-sized.</td>
+          </tr>
+          <tr>
+            <td>Both players missing a lot</td>
+            <td>Detection settings. Re-run <code>autotune</code> on <em>this</em> file — a re-encode needs its own profile.</td>
+          </tr>
+          <tr>
+            <td>"players merged"</td>
+            <td>They are overlapping in the picture. The tool refuses to guess who is where and claims no position. Normal in about 15% of rally frames.</td>
+          </tr>
+          <tr>
+            <td>Peak speed reads 30 m/s</td>
+            <td>The foot point is jumping. Try <code>--smoothing strong</code>, but treat the path as unreliable — smoothing hides noise, it does not remove it.</td>
+          </tr>
+          <tr>
+            <td>Nothing detected at all</td>
+            <td>The court crop assumes a camera behind the court. A different angle needs <code>COURT_ROI</code> in <code>squashvision/detect/players.py</code> changed.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="commands">Every command</h3>
+    <p>
+      Roughly in the order you would run them. Each is typed after the prefix
+      <code>./.venv/Scripts/python.exe -m squashvision</code> — so the first row is run as
+      <code>./.venv/Scripts/python.exe -m squashvision calibrate …</code>.
+    </p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th style="width:22%">Command</th><th style="width:30%">Does</th><th>How often</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>calibrate</code></td><td>Click the court landmarks</td><td>Once per camera angle</td></tr>
+          <tr><td><code>autotune</code></td><td>Fit detection settings</td><td>Once per video file</td></tr>
+          <tr><td><code>roster</code></td><td>Name the players, fence non-players</td><td>Once per match</td></tr>
+          <tr><td><code>track</code></td><td>Positions to CSV</td><td>As needed</td></tr>
+          <tr><td><code>demo</code></td><td>Annotated clip of what the tracker believes</td><td>As needed</td></tr>
+          <tr><td><code>birdseye</code></td><td>Camera view beside a court plan</td><td>As needed</td></tr>
+          <tr><td><code>play</code></td><td>Split into play and between-game breaks</td><td>As needed</td></tr>
+          <tr><td><code>scoreboard</code></td><td>Rally ends from score-box changes</td><td>Check first</td></tr>
+          <tr><td><code>scoredigits</code></td><td>Read the score itself, cell by cell</td><td>Check first</td></tr>
+          <tr><td><code>label</code></td><td>Hand-mark rally ends</td><td>To validate</td></tr>
+          <tr><td><code>rallies</code></td><td>Split play into rallies, score it</td><td>As needed</td></tr>
+          <tr><td><code>train</code></td><td>Fit the rally detector, held-out scored</td><td>Once per match</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Where files live</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:24%">Folder</th><th>Holds</th></tr></thead>
+        <tbody>
+          <tr><td><code>profiles/</code></td><td>The small JSON files you make: court calibration, detection profile, roster, rally config. Keep these — they are the work.</td></tr>
+          <tr><td><code>output/</code></td><td>Rendered videos, CSVs, check images. All regenerable; safe to delete.</td></tr>
+          <tr><td><code>squashvision/</code></td><td>The code.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================ PART TWO ============================ -->
+
+  <section class="part" id="part2">
+    <p class="part-label">Part two</p>
+    <h2>How it works</h2>
+    <p>
+      The design, and the measurements that forced it. Most of what follows exists
+      because something simpler was tried first and failed on real footage.
+    </p>
+  </section>
+
+  <div class="col">
+    <h3>The constraint that shapes everything</h3>
+    <p>
+      There is no GPU. That rules out the usual answer — a person-detector run on every
+      frame — and pushes the whole design toward classical computer vision: subtract a
+      background model, keep the blobs that are the right size, and reason about the
+      handful that survive. Everything downstream is a consequence of that one blob
+      detector being cheap but crude.
+    </p>
+    <p>
+      The same approach was tried for the ball and abandoned. A ball is four pixels
+      across; so is compression noise, so is scoreboard flicker. Nothing in the picture
+      separates them. A player is 20 to 60 pixels wide and a simple size floor removes
+      essentially all the clutter — which is exactly why this works for bodies and not
+      for the ball.
+    </p>
+  </div>
+
+  <figure id="pipeline" class="fig-wide">
+    <svg viewBox="0 0 1000 300" role="img" aria-label="The pipeline: video frames become foreground blobs, then two tracked players, then positions in court metres, then rallies; the roster and calibration files feed in from the side.">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="ar-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--court)"/>
+        </marker>
+      </defs>
+
+      <!-- stage boxes -->
+      <g fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="16"  y="96" width="150" height="66" rx="4"/>
+        <rect x="216" y="96" width="150" height="66" rx="4"/>
+        <rect x="416" y="96" width="150" height="66" rx="4"/>
+        <rect x="616" y="96" width="150" height="66" rx="4"/>
+        <rect x="816" y="96" width="168" height="66" rx="4"/>
+      </g>
+
+      <g font-family="Archivo, sans-serif" font-size="14" font-weight="600" fill="currentColor" text-anchor="middle">
+        <text x="91"  y="124">frames</text>
+        <text x="291" y="124">blobs</text>
+        <text x="491" y="124">two tracks</text>
+        <text x="691" y="124">metres</text>
+        <text x="900" y="124">rallies</text>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)" text-anchor="middle">
+        <text x="91"  y="144">decode · crop</text>
+        <text x="291" y="144">detect/players</text>
+        <text x="491" y="144">detect/players</text>
+        <text x="691" y="144">geometry/tracks</text>
+        <text x="900" y="144">rally/rallies</text>
+      </g>
+
+      <!-- arrows between stages -->
+      <g stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)">
+        <line x1="166" y1="129" x2="210" y2="129"/>
+        <line x1="366" y1="129" x2="410" y2="129"/>
+        <line x1="566" y1="129" x2="610" y2="129"/>
+        <line x1="766" y1="129" x2="810" y2="129"/>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)" text-anchor="middle">
+        <text x="188" y="120">subtract</text>
+        <text x="388" y="120">associate</text>
+        <text x="588" y="120">project</text>
+        <text x="788" y="120">segment</text>
+      </g>
+
+      <!-- inputs from a person -->
+      <g fill="none" stroke="var(--court)" stroke-width="1.4" stroke-dasharray="4 3">
+        <rect x="216" y="22" width="150" height="42" rx="4"/>
+        <rect x="616" y="22" width="150" height="42" rx="4"/>
+      </g>
+      <g font-family="Archivo, sans-serif" font-size="12.5" font-weight="600" fill="var(--court)" text-anchor="middle">
+        <text x="291" y="41">detection profile</text>
+        <text x="691" y="41">court calibration</text>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--court)" text-anchor="middle">
+        <text x="291" y="55">autotune</text>
+        <text x="691" y="55">calibrate</text>
+      </g>
+      <g stroke="var(--court)" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ar-c)">
+        <line x1="291" y1="64" x2="291" y2="90"/>
+        <line x1="691" y1="64" x2="691" y2="90"/>
+      </g>
+
+      <!-- roster feeds two stages -->
+      <rect x="380" y="228" width="222" height="48" rx="4" fill="none" stroke="var(--court)" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <text x="491" y="248" font-family="Archivo, sans-serif" font-size="12.5" font-weight="600" fill="var(--court)" text-anchor="middle">roster — who is playing</text>
+      <text x="491" y="264" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--court)" text-anchor="middle">shirt colours + fenced non-players</text>
+      <g stroke="var(--court)" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#ar-c)">
+        <path d="M 400 228 L 400 200 L 291 200 L 291 168"/>
+        <path d="M 491 228 L 491 168"/>
+      </g>
+
+      <text x="16" y="290" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">solid = video data · dashed = supplied by a person, once per camera or match</text>
+    </svg>
+    <figcaption>
+      <b>Figure 1 — the pipeline.</b> Four transformations turn a video into court
+      positions. The three dashed inputs are the only things a person supplies, and each
+      enters at exactly one stage: detection settings shape which blobs exist, the
+      calibration converts pixels to metres, and the roster decides which blobs are
+      players and which of the two each one is.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3 id="detection-text">Finding bodies</h3>
+    <p>
+      Every frame is shrunk to 480 pixels wide and cropped to the court, which drops the
+      neighbouring court, the crowd above, and the burnt-in graphics. That crop is the
+      coordinate system everything else uses.
+    </p>
+    <p>
+      The background is a <em>median</em> of 21 frames sampled across a 300-frame chunk —
+      a median rather than an average because a player crossing the frame is an outlier,
+      and a median ignores outliers where a mean smears them into the model. Subtracting
+      it leaves the parts of the picture that moved.
+    </p>
+    <p>
+      This is also the detector's central weakness, and it explains a lot of the
+      behaviour further down: <strong>a player who stops moving disappears.</strong> He
+      becomes part of his own background. What survives the subtraction is whatever
+      twitched — an arm, a racket — which is why a single frame's measurement of a
+      near-stationary player is close to meaningless.
+    </p>
+  </div>
+
+  <figure id="detection" class="fig-wide">
+    <svg viewBox="0 0 1000 330" role="img" aria-label="One frame passes through downscale, crop, median-background subtraction, thresholding, morphology and connected components; then three filters drop blobs — size, the user's fences, and a per-frame cap — before the survivors become detections.">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="ar2-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--court)"/>
+        </marker>
+      </defs>
+
+      <text x="16" y="24" font-family="Archivo, sans-serif" font-size="12" font-weight="600" fill="var(--muted)" letter-spacing="1.4">PER FRAME</text>
+      <line x1="16" y1="34" x2="984" y2="34" stroke="var(--hair)" stroke-width="1"/>
+
+      <!-- chain -->
+      <g fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="16"  y="56" width="120" height="52" rx="4"/>
+        <rect x="176" y="56" width="120" height="52" rx="4"/>
+        <rect x="336" y="56" width="140" height="52" rx="4"/>
+        <rect x="516" y="56" width="140" height="52" rx="4"/>
+        <rect x="696" y="56" width="140" height="52" rx="4"/>
+      </g>
+      <g font-family="Archivo, sans-serif" font-size="13" font-weight="600" fill="currentColor" text-anchor="middle">
+        <text x="76"  y="80">downscale</text>
+        <text x="236" y="80">crop to court</text>
+        <text x="406" y="80">subtract</text>
+        <text x="586" y="80">threshold</text>
+        <text x="766" y="80">components</text>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)" text-anchor="middle">
+        <text x="76"  y="97">480 px wide</text>
+        <text x="236" y="97">389 × 231</text>
+        <text x="406" y="97">median of 21</text>
+        <text x="586" y="97">open, then close</text>
+        <text x="766" y="97">8-connected</text>
+      </g>
+      <g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)">
+        <line x1="136" y1="82" x2="170" y2="82"/>
+        <line x1="296" y1="82" x2="330" y2="82"/>
+        <line x1="476" y1="82" x2="510" y2="82"/>
+        <line x1="656" y1="82" x2="690" y2="82"/>
+      </g>
+
+      <!-- funnel of filters -->
+      <text x="16" y="152" font-family="Archivo, sans-serif" font-size="12" font-weight="600" fill="var(--muted)" letter-spacing="1.4">WHAT GETS DROPPED, AND BY WHAT</text>
+      <line x1="16" y1="162" x2="984" y2="162" stroke="var(--hair)" stroke-width="1"/>
+
+      <line x1="766" y1="108" x2="766" y2="180" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M 766 180 L 130 180 L 130 196" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="40" y="196" width="180" height="58" rx="4"/>
+        <rect x="280" y="196" width="180" height="58" rx="4"/>
+        <rect x="520" y="196" width="180" height="58" rx="4"/>
+      </g>
+      <rect x="760" y="196" width="200" height="58" rx="4" fill="none" stroke="var(--court)" stroke-width="2"/>
+
+      <g font-family="Archivo, sans-serif" font-size="13" font-weight="600" text-anchor="middle" fill="currentColor">
+        <text x="130" y="220">size floor</text>
+        <text x="370" y="220">your fences</text>
+        <text x="610" y="220">largest four</text>
+      </g>
+      <text x="860" y="220" font-family="Archivo, sans-serif" font-size="13" font-weight="600" fill="var(--court)" text-anchor="middle">detections</text>
+
+      <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)" text-anchor="middle">
+        <text x="130" y="238">area, height</text>
+        <text x="370" y="238">region AND size</text>
+        <text x="610" y="238">by area</text>
+      </g>
+      <text x="860" y="238" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)" text-anchor="middle">box + torso colour + foot</text>
+
+      <g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)">
+        <line x1="220" y1="225" x2="274" y2="225"/>
+        <line x1="460" y1="225" x2="514" y2="225"/>
+      </g>
+      <line x1="700" y1="225" x2="754" y2="225" stroke="var(--court)" stroke-width="1.6" marker-end="url(#ar2-c)"/>
+
+      <!-- annotation on the cap -->
+      <path d="M 610 254 L 610 286" fill="none" stroke="var(--court)" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="610" y="300" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--court)" text-anchor="middle">was three — a spectator outranked a real player</text>
+      <text x="370" y="300" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)" text-anchor="middle">region alone would delete back-court players</text>
+      <path d="M 370 254 L 370 286" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 3"/>
+    </svg>
+    <figcaption>
+      <b>Figure 2 — one frame, and the three places a blob can be discarded.</b> The
+      order matters. The fences test region <em>and</em> size together because on a camera
+      behind the court a spectator at the near glass occupies the same rows as a player
+      at the back: a box drawn round one deletes the other. Only apparent size separates
+      them — in those rows spectators measure 35–53 px where players measure 56–133.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>Following, and knowing who is who</h3>
+    <p>
+      Two constant-velocity Kalman filters carry the tracks. They are not there to chase
+      fast movement — players only move about 4.5 px between samples against a body 20 to
+      60 px wide. They are there to do two other things: reject associations that are
+      physically impossible, and say where each player is inside a single blob when the
+      two of them merge into one.
+    </p>
+    <p>
+      Motion answers <em>which body was I following</em>. It cannot answer <em>which
+      player is this</em>, and those are different problems that need different evidence
+      on different clocks. The identity problem is where this tool has had the most
+      failures, and it now has three defences layered on top of each other.
+    </p>
+
+    <h4>Before any of them: the tracker may decline to start</h4>
+    <p>
+      Seeding is the one decision made from a single frame, and the head of a recording
+      is the worst place to make it. During a knock-up the players move slowly, so
+      background subtraction recovers only about half of each body — limbs and edges
+      rather than the shirt itself. On the Connecticut capture at t=0 the white-shirted
+      player measured <strong>L=127 against his dark-shirted opponent's L=132</strong>:
+      darker than the man he is supposed to contrast with. Taking the cheapest pairing
+      there hands slot 0 to the wrong player and inverts every label until the
+      accumulated evidence has seen enough to swap them back.
+    </p>
+    <p>
+      So a frame has to earn the right to seed, on two tests. Each candidate must
+      <em>lean</em> toward its own player — nearer that shirt than the other by a margin
+      — which refuses a frame where both bodies read as the same colour. And each must
+      be within an absolute distance of the shirt it is being matched to, which is what
+      leaning alone cannot do: a teammate in a maroon hoodie standing outside the court
+      sat 64 units from one shirt and 42 from the other, so he "leaned dark" by 22 while
+      looking like nobody at all. Frames that fail claim no position and the tracker
+      tries the next one; the wait is reported rather than hidden.
+    </p>
+  </div>
+
+  <figure id="identity" class="fig-wide">
+    <svg viewBox="0 0 1000 400" role="img" aria-label="Three identity defences on one timeline: a per-frame association gate, a rejection test for candidates that look more like the opponent, and an accumulated-evidence check that swaps the two slots when they are the wrong way round.">
+      <defs>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <!-- timeline -->
+      <line x1="80" y1="356" x2="960" y2="356" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar3)"/>
+      <text x="80" y="380" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">frame</text>
+      <text x="960" y="380" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)" text-anchor="end">time →</text>
+      <g stroke="var(--hair)" stroke-width="1">
+        <line x1="180" y1="350" x2="180" y2="362"/>
+        <line x1="380" y1="350" x2="380" y2="362"/>
+        <line x1="580" y1="350" x2="580" y2="362"/>
+        <line x1="780" y1="350" x2="780" y2="362"/>
+      </g>
+
+      <!-- defence 1 -->
+      <rect x="80" y="40" width="256" height="126" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="98" y="66" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">EVERY FRAME</text>
+      <text x="98" y="90" font-family="Archivo, sans-serif" font-size="15" font-weight="600" fill="currentColor">1 · Motion gate</text>
+      <text x="98" y="113" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">cost = distance + colour</text>
+      <text x="98" y="130" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">outside the gate = unreachable</text>
+      <text x="98" y="152" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">keeps a track on one body</text>
+
+      <!-- defence 2 -->
+      <rect x="372" y="40" width="256" height="126" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="390" y="66" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">EVERY FRAME</text>
+      <text x="390" y="90" font-family="Archivo, sans-serif" font-size="15" font-weight="600" fill="currentColor">2 · Refuse a stranger</text>
+      <text x="390" y="113" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">2× further from mine</text>
+      <text x="390" y="130" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">than from his → no match</text>
+      <text x="390" y="152" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">the track coasts instead</text>
+
+      <!-- defence 3 -->
+      <rect x="664" y="40" width="296" height="126" rx="4" fill="none" stroke="var(--court)" stroke-width="2"/>
+      <text x="682" y="66" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)">OVER ~8 MEASUREMENTS</text>
+      <text x="682" y="90" font-family="Archivo, sans-serif" font-size="15" font-weight="600" fill="var(--court)">3 · Accumulated evidence</text>
+      <text x="682" y="113" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">running mean of "looks like P0"</text>
+      <text x="682" y="130" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">wrong way round → swap slots</text>
+      <text x="682" y="152" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">fixes a bad start, a second late</text>
+
+      <!-- the evidence trace -->
+      <text x="80" y="210" font-family="Archivo, sans-serif" font-size="12" font-weight="600" fill="var(--muted)" letter-spacing="1.4">ONE TRACK'S COLOUR EVIDENCE</text>
+
+      <line x1="80" y1="288" x2="960" y2="288" stroke="var(--hair)" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="966" y="291" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--muted)">even</text>
+      <text x="966" y="236" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--p0)">P0</text>
+      <text x="966" y="338" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--p1)">P1</text>
+
+      <!-- noisy per-frame readings -->
+      <g fill="var(--muted)">
+        <circle cx="120" cy="252" r="3"/><circle cx="150" cy="318" r="3"/>
+        <circle cx="180" cy="236" r="3"/><circle cx="210" cy="330" r="3"/>
+        <circle cx="240" cy="262" r="3"/><circle cx="270" cy="240" r="3"/>
+        <circle cx="300" cy="322" r="3"/><circle cx="330" cy="246" r="3"/>
+        <circle cx="360" cy="300" r="3"/><circle cx="390" cy="232" r="3"/>
+        <circle cx="420" cy="314" r="3"/><circle cx="450" cy="256" r="3"/>
+        <circle cx="480" cy="242" r="3"/><circle cx="510" cy="326" r="3"/>
+        <circle cx="540" cy="248" r="3"/><circle cx="570" cy="270" r="3"/>
+        <circle cx="600" cy="234" r="3"/><circle cx="630" cy="310" r="3"/>
+        <circle cx="660" cy="252" r="3"/><circle cx="690" cy="240" r="3"/>
+        <circle cx="720" cy="298" r="3"/><circle cx="750" cy="238" r="3"/>
+        <circle cx="780" cy="258" r="3"/><circle cx="810" cy="244" r="3"/>
+        <circle cx="840" cy="304" r="3"/><circle cx="870" cy="236" r="3"/>
+        <circle cx="900" cy="250" r="3"/><circle cx="930" cy="242" r="3"/>
+      </g>
+
+      <!-- the running average -->
+      <polyline points="120,288 150,292 180,286 210,292 240,288 270,282 300,290 330,284 360,288 390,280 420,286 450,282 480,276 510,284 540,278 570,276 600,270 630,276 660,270 690,264 720,270 750,262 780,260 810,254 840,260 870,252 900,250 930,248"
+                fill="none" stroke="var(--p0)" stroke-width="2.5"/>
+
+      <text x="130" y="216" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">grey dots = one frame each</text>
+      <text x="670" y="216" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--p0)">thick line = running mean, the thing trusted</text>
+    </svg>
+    <figcaption>
+      <b>Figure 3 — why identity is decided slowly.</b> These three run once seeding has
+      accepted a frame. The grey dots are what a single frame says about who a track is
+      following: over ten consecutive frames of the <em>same</em> stationary player, the
+      measured shirt colour swings from 3 units off his own reference to 42. No per-frame
+      test can survive that. The running mean does separate the two, so the swap decision
+      waits for it — which also means a bad start corrects itself about a second later
+      instead of poisoning the whole clip.
+    </figcaption>
+    <div class="legend">
+      <span><i class="chip" style="background:var(--p0)"></i>player 0</span>
+      <span><i class="chip" style="background:var(--p1)"></i>player 1</span>
+      <span><i class="chip" style="background:var(--muted)"></i>single-frame reading</span>
+    </div>
+  </figure>
+
+  <div class="col">
+    <h4>The colour gate: nothing that far away is that player</h4>
+    <p>
+      Colour entered the association as a <em>penalty</em> — it made a badly-matching
+      candidate expensive, but never impossible. That is not enough on its own, because
+      the motion gate will happily offer up a spectator standing exactly where the player
+      was, and a penalty can always be outweighed by being close. The result was
+      measurable: the light-shirt slot held a detection more than 35 units from its own
+      shirt in <strong>9–15% of measured frames</strong> — against 3–6% for the dark slot,
+      which is easier to pick out against a pale court — with lock-ons running up to 18
+      consecutive frames at a mean distance of 46 to 59.
+    </p>
+    <p>
+      So there is now a hard ceiling: beyond <strong>40 units</strong> from a named shirt,
+      a candidate is refused outright and the track coasts instead. This is the test that
+      catches a stranger in a colour <em>neither</em> player is wearing — and it is the
+      only one that can. The relative test below cannot, because such a person is far from
+      both anchors and therefore leans toward neither. Swept over eighteen minutes:
+    </p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Ceiling</th>
+            <th class="num">Light-shirt measurements kept</th>
+            <th class="num">Frames still held beyond 35</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>none</td><td class="num">6,189</td><td class="num">281</td></tr>
+          <tr><td>55</td><td class="num">6,185</td><td class="num">273</td></tr>
+          <tr><td>45</td><td class="num">6,122</td><td class="num">190</td></tr>
+          <tr><td><strong>40</strong> — chosen</td><td class="num"><strong>6,065</strong></td><td class="num"><strong>135</strong></td></tr>
+          <tr><td>35</td><td class="num">5,866</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      40 removes every association beyond 40 for 2% of the light player's measurements and
+      0.07 points of coverage. Tightening to 35 costs 5% for a band that is genuinely
+      mixed — at mid-court a reading of 36 is usually the player himself, measured badly.
+      The demo prints this number live as <code>d=</code> beside each player, so you can
+      watch identity being checked rather than assumed.
+    </p>
+
+    <h4>Refusing a candidate — and when not to</h4>
+    <p>
+      Defence 2 has a sharp edge, and pointing it the wrong way made things worse rather
+      than better. Applied on every frame, it vetoed the tracked player <em>himself</em>:
+      the light-shirted player's single-frame reading regularly comes out darker than his
+      opponent's, trips the ratio, and gets refused. The visible symptom was the tool
+      appearing to ignore him entirely.
+    </p>
+    <p>
+      It now applies only to a track that is <strong>already coasting</strong> — which is
+      the only moment adopting a stranger is a risk, because the track has lost its
+      player. Measured over three spans of play totalling eight minutes (a fourth span
+      turned out to be a between-games break and is excluded — see below):
+    </p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Veto applies</th>
+            <th class="num">Light-shirt measurements</th>
+            <th class="num">Both players</th>
+            <th class="num">Implausible jumps</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>on every frame</td><td class="num">2,348</td><td class="num">90.4%</td><td class="num">74</td></tr>
+          <tr><td>never</td><td class="num">2,712</td><td class="num">91.0%</td><td class="num">96</td></tr>
+          <tr><td><strong>only while coasting</strong></td><td class="num"><strong>2,630</strong></td><td class="num"><strong>91.1%</strong></td><td class="num"><strong>83</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Vetoing always costs about a fifth of one player's data. Never vetoing gives that
+      back but lets a coasting track sit on a spectator for around a second. Restricting
+      it to coasting tracks keeps nearly all the measurements and still refuses the
+      spectator. The frames it does decline are reported as coasted, so what is given up
+      stays visible rather than becoming silently wrong.
+    </p>
+
+    <h4>A fourth defence: giving up a track that has settled on furniture</h4>
+    <p>
+      The obvious rule — "a track that stops moving is not on a player" — is wrong on its
+      own, and measurably so. A differencing detector does not stop seeing a player who
+      stands still, and players stand still often: during the Connecticut knock-up the
+      real dark-shirted player held one spot for six seconds, 47 consecutive measurements
+      with <strong>1.8 px of wander</strong>, while his partner hit. Stillness alone would
+      have deleted him.
+    </p>
+    <p>
+      What separates the two is stillness <em>plus</em> not looking like the man the track
+      is named for. Across 1459 three-second windows, 227 of them nearly stationary, the
+      distance from the track's own shirt inside a stationary window is bimodal — p75 of
+      8.7 against a p90 of 35.1. The lower mode is players pausing between rallies; the
+      upper is a track sitting on somebody at the near glass. Requiring both conditions
+      fired in exactly two places across eighteen minutes, and both were spectators.
+    </p>
+
+    <h3 id="floor-text">Getting onto the floor</h3>
+    <p>
+      A homography — fitted from the landmarks you clicked in step 3 — maps the image
+      plane to the court plane. What gets mapped matters more than it looks. Not the
+      centre of the blob, which floats at chest height and has no fixed relationship to
+      the ground, but a <em>foot contact point</em>: the horizontal centre of the whole
+      silhouette paired with its lowest row.
+    </p>
+    <p>
+      Both halves of that were picked by measurement and both are counter-intuitive.
+      Taking the horizontal position from the feet themselves is markedly worse, because
+      feet swing back and forth with every stride while the body's centroid does not.
+      And a coasted position is never projected at all — its box is synthesised from a
+      remembered size, so its bottom edge is a guess, and projecting a guess produces a
+      confident-looking court position that no pixels support.
+    </p>
+  </div>
+
+  <figure id="floor" class="fig-wide">
+    <svg viewBox="0 0 1000 340" role="img" aria-label="Left: a camera view showing a player's blob with its foot contact point marked. Right: the same point on a bird's-eye court plan. A shaded band shows the back 1.6 metres of the court that falls below the bottom of frame and cannot be observed.">
+      <defs>
+        <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--court)"/>
+        </marker>
+        <pattern id="hatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="7" stroke="var(--court)" stroke-width="1.6" opacity=".38"/>
+        </pattern>
+      </defs>
+
+      <text x="16" y="24" font-family="Archivo, sans-serif" font-size="12" font-weight="600" fill="var(--muted)" letter-spacing="1.4">CAMERA VIEW</text>
+      <text x="600" y="24" font-family="Archivo, sans-serif" font-size="12" font-weight="600" fill="var(--muted)" letter-spacing="1.4">COURT PLAN, METRES</text>
+
+      <!-- camera view: perspective court -->
+      <path d="M 150 70 L 400 70 L 500 300 L 50 300 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="112" y1="158" x2="438" y2="158" stroke="var(--court)" stroke-width="1.3"/>
+      <line x1="275" y1="158" x2="275" y2="300" stroke="var(--court)" stroke-width="1.3"/>
+      <text x="150" y="150" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)">short line</text>
+      <text x="270" y="62" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)" text-anchor="middle">front wall</text>
+
+      <!-- blob -->
+      <rect x="228" y="120" width="42" height="96" rx="3" fill="var(--p0-fill)" stroke="var(--p0)" stroke-width="1.8"/>
+      <circle cx="249" cy="168" r="3" fill="var(--p0)"/>
+      <text x="286" y="166" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">centroid — not used</text>
+      <polygon points="249,216 243,228 255,228" fill="var(--court)"/>
+      <text x="262" y="232" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--court)">foot contact point</text>
+      <line x1="249" y1="120" x2="249" y2="216" stroke="var(--p0)" stroke-width="1" stroke-dasharray="2 3"/>
+
+      <!-- unobservable band in camera view -->
+      <path d="M 50 300 L 500 300 L 486 268 L 64 268 Z" fill="url(#hatch)" stroke="none"/>
+      <text x="275" y="318" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)" text-anchor="middle">below the frame edge</text>
+
+      <!-- mapping arrow -->
+      <path d="M 520 200 C 560 200 560 200 596 200" fill="none" stroke="var(--court)" stroke-width="1.8" marker-end="url(#ar4)"/>
+      <text x="558" y="192" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)" text-anchor="middle">homography</text>
+
+      <!-- plan -->
+      <rect x="640" y="46" width="230" height="254" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="640" y1="157" x2="870" y2="157" stroke="var(--court)" stroke-width="1.3"/>
+      <line x1="755" y1="157" x2="755" y2="300" stroke="var(--court)" stroke-width="1.3"/>
+      <rect x="640" y="157" width="58" height="42" fill="none" stroke="var(--court)" stroke-width="1.1"/>
+      <rect x="812" y="157" width="58" height="42" fill="none" stroke="var(--court)" stroke-width="1.1"/>
+      <text x="755" y="38" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)" text-anchor="middle">front wall · 0 m</text>
+      <text x="880" y="161" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)">4.26 m</text>
+      <text x="880" y="304" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">9.75 m</text>
+
+      <!-- unobservable band on plan -->
+      <rect x="640" y="258" width="230" height="42" fill="url(#hatch)" stroke="none"/>
+      <line x1="640" y1="258" x2="870" y2="258" stroke="var(--court)" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="880" y="262" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)">8.16 m</text>
+
+      <circle cx="742" cy="196" r="6" fill="var(--p0)"/>
+      <text x="756" y="200" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">same point, now in metres</text>
+
+      <text x="640" y="324" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--court)">hatched = never observable, not "no player there"</text>
+    </svg>
+    <figcaption>
+      <b>Figure 4 — pixels to metres, and the edge of what the camera can see.</b> On the
+      Bates camera the back 1.6 m of the court falls below the bottom of frame. That is
+      why the tool reports a visible depth and warns about it: a player standing there
+      produces no position, and reading that as "he was not at the back" is the mistake
+      the warning exists to prevent. It is also why the court outline cannot be used to
+      reject spectators — their feet are hidden behind the glass, so everything at the
+      near edge maps to about 8.1 m and lands <em>inside</em> the court.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>Rallies, and the honesty problem</h3>
+    <p>
+      Rally boundaries come from movement: a short window of averaged speed for both
+      players, and a stretch of quiet long enough to be a real break. There was also a
+      "serve formation" term — one player in a service box, the other diagonally
+      opposite — and it is switched off by default. That is worth explaining, because it
+      is the clearest example of the discipline the codebase tries to keep.
+    </p>
+    <p>
+      The formation term looked excellent at first: F1 0.92 against 0.79 for speed alone.
+      But that sweep scored on the same points it had been fitted to. Under held-out
+      scoring it reverses — speed alone 0.85, with the formation term 0.71. The service
+      boxes cover a large part of the back court, so players stand in one mid-rally all
+      the time and the term invents breaks. The knob still exists and
+      <code>train</code> still searches it; it just defaults to off.
+    </p>
+    <p>
+      That is why <code>train</code> splits the match into contiguous time blocks and
+      scores each fold on blocks it did not fit on. It prints both numbers and labels the
+      optimistic one as such. The saved config file records both, with a note saying
+      which to quote.
+    </p>
+
+    <h4>Where the labels come from</h4>
+    <p>
+      A broadcast scoreboard changes exactly once per point, which makes it better ground
+      truth than anything in the player movement — and it is free. Two readers exist:
+    </p>
+    <ul>
+      <li>
+        <code>scoreboard</code> watches the score box for a change that <em>persists</em>.
+        Simple, but it can only ever report that something moved, so it cannot be checked.
+      </li>
+      <li>
+        <code>scoredigits</code> reads the numbers, without a font model. Within a game a
+        cell counts 0, 1, 2, 3 and never goes back — so the <em>k</em>-th distinct
+        appearance a cell settles into <em>is</em> the number <em>k</em>. That turns every
+        detection into a claim you can check: the final tally must equal the score on the
+        board.
+      </li>
+    </ul>
+    <p>
+      The second is preferred for exactly that reason. It is checkable; the first is not.
+    </p>
+  </div>
+
+  <figure id="layout" class="fig-wide">
+    <svg viewBox="0 0 1000 420" role="img" aria-label="Module map in five layers: a shared base of cli and overlay; detection; geometry; scoreboard reading; rally segmentation; and rendering. Arrows show that dependencies only ever point downward.">
+      <defs>
+        <marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <!-- layer labels -->
+      <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">
+        <text x="16" y="44">entry</text>
+        <text x="16" y="132">uses</text>
+        <text x="16" y="240">core</text>
+        <text x="16" y="352">shared</text>
+      </g>
+
+      <!-- entry -->
+      <rect x="90" y="22" width="180" height="34" rx="4" fill="none" stroke="var(--court)" stroke-width="2"/>
+      <text x="180" y="44" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--court)" text-anchor="middle">__main__.py</text>
+      <text x="284" y="44" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--muted)">one front door, 12 commands</text>
+
+      <!-- top layer: consumers -->
+      <g fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="90"  y="96" width="196" height="70" rx="4"/>
+        <rect x="330" y="96" width="196" height="70" rx="4"/>
+        <rect x="570" y="96" width="196" height="70" rx="4"/>
+      </g>
+      <g font-family="Archivo, sans-serif" font-size="13.5" font-weight="600" fill="currentColor">
+        <text x="106" y="120">view/</text>
+        <text x="346" y="120">rally/</text>
+        <text x="586" y="120">fit/</text>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">
+        <text x="106" y="139">demo · birdseye</text>
+        <text x="106" y="155">draws, computes nothing</text>
+        <text x="346" y="139">rallies · label</text>
+        <text x="346" y="155">segments play</text>
+        <text x="586" y="139">autotune · train</text>
+        <text x="586" y="155">held-out scoring</text>
+      </g>
+
+      <!-- core layer -->
+      <g fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="90"  y="204" width="196" height="86" rx="4"/>
+        <rect x="330" y="204" width="196" height="86" rx="4"/>
+        <rect x="570" y="204" width="196" height="86" rx="4"/>
+      </g>
+      <g font-family="Archivo, sans-serif" font-size="13.5" font-weight="600" fill="currentColor">
+        <text x="106" y="228">detect/</text>
+        <text x="346" y="228">geometry/</text>
+        <text x="586" y="228">score/</text>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">
+        <text x="106" y="247">players — detect + track</text>
+        <text x="106" y="263">roster — who is playing</text>
+        <text x="106" y="279">play — play vs breaks</text>
+        <text x="346" y="247">court — homography</text>
+        <text x="346" y="263">tracks — paths in metres</text>
+        <text x="346" y="279">calibrate — the picker</text>
+        <text x="586" y="247">scoreboard — changes</text>
+        <text x="586" y="263">scoredigits — the score</text>
+        <text x="586" y="279">free ground truth</text>
+      </g>
+
+      <!-- shared base -->
+      <rect x="90" y="326" width="676" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="106" y="348" font-family="Archivo, sans-serif" font-size="13.5" font-weight="600" fill="currentColor">cli.py · overlay.py</text>
+      <text x="106" y="367" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">argument plumbing, the shared pipeline call, the palette and drawing helpers</text>
+
+      <!-- arrows: entry to consumers -->
+      <g stroke="currentColor" stroke-width="1.2" marker-end="url(#ar5)" fill="none">
+        <path d="M 180 56 L 180 90"/>
+        <path d="M 230 56 L 428 56 L 428 90"/>
+        <path d="M 250 56 L 668 56 L 668 90"/>
+      </g>
+
+      <!-- arrows: consumers to core -->
+      <g stroke="currentColor" stroke-width="1.2" marker-end="url(#ar5)" fill="none">
+        <path d="M 160 166 L 160 198"/>
+        <path d="M 240 166 L 240 186 L 380 186 L 380 198"/>
+        <path d="M 400 166 L 400 198"/>
+        <path d="M 470 166 L 470 186 L 200 186 L 200 198"/>
+        <path d="M 640 166 L 640 198"/>
+        <path d="M 700 166 L 700 186 L 460 186 L 460 198"/>
+      </g>
+
+      <!-- arrows: core to base -->
+      <g stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar5)" fill="none">
+        <path d="M 188 290 L 188 320"/>
+        <path d="M 428 290 L 428 320"/>
+        <path d="M 668 290 L 668 320"/>
+      </g>
+
+      <text x="800" y="212" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--court)">arrows only point down.</text>
+      <text x="800" y="230" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">geometry/tracks.py exists</text>
+      <text x="800" y="246" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">because rally/ and fit/ once</text>
+      <text x="800" y="262" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">imported view/birdseye to get</text>
+      <text x="800" y="278" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">at court maths — backwards.</text>
+    </svg>
+    <figcaption>
+      <b>Figure 5 — the module map.</b> Folders are grouped by what they do, and the rule
+      that keeps them honest is that dependencies only ever point downward. The rendering
+      layer knows about the core; the core never knows about rendering. Commands are typed
+      as <code>-m squashvision demo</code> regardless, so the layout can be
+      rearranged without invalidating anyone's notes.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>The habits worth keeping</h3>
+    <p>
+      Three conventions run through the whole codebase, and they are the reason its
+      numbers can be trusted.
+    </p>
+    <p>
+      <strong>Nothing is passed off as observed when it was not.</strong> Every position
+      carries its provenance — <code>measured</code>, <code>split</code> from a merged
+      blob, or <code>predicted</code> by the motion model. The CSV records it, the demo
+      draws coasted positions as corner ticks rather than solid boxes, and the bird's-eye
+      plan draws them as hollow circles. When the tool does not know, it says so instead
+      of filling in.
+    </p>
+    <p>
+      <strong>Constants carry the measurement that set them.</strong> Nearly every
+      threshold in <code>detect/players.py</code> has a comment giving the numbers behind
+      it — often including what was tried first and why it failed. That is what stops the
+      next person, or the next session, from re-litigating a settled question or quietly
+      undoing a fix.
+    </p>
+    <p>
+      <strong>Fitted numbers are separated from honest ones.</strong> Where anything is
+      tuned, it is scored on data it was not tuned on, and both figures are printed with
+      the optimistic one labelled. The config files carry a <code>note</code> field
+      saying which to quote.
+    </p>
+
+    <h3>Known limits</h3>
+    <ul>
+      <li><strong>Ball tracking does not work.</strong> Resolved 0 of 14 labelled impacts on real footage. Not a tuning problem.</li>
+      <li><strong>The score box is one broadcast's.</strong> Hard-coded fractions; a different production needs new ones.</li>
+      <li><strong>Per-player statistics are not validated.</strong> Identity has been checked by eye on sampled frames and by the aggregate measures above, but never against hand labels naming which player took which shot.</li>
+      <li><strong>Merges lose about 15% of rally frames.</strong> Prediction-guided splitting recovers some; the rest claim no position by design.</li>
+      <li><strong>The court crop assumes a camera behind the court.</strong> Another angle needs <code>COURT_ROI</code> changed.</li>
+    </ul>
+  </div>
+
+  <footer>
+    Squashvision — Python 3.14, numpy and opencv-python, CPU only. Measurements quoted
+    throughout come from the Bates vs Amherst and Bates vs Connecticut arena captures.
+    Run <code>./.venv/Scripts/python.exe -m squashvision</code> for the command list.
+  </footer>
+
+</div>

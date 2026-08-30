@@ -1,0 +1,133 @@
+{
+  "video": "C:/Users/John_/Downloads/squashvisiontest.mp4",
+  "court": {
+    "width": 6.4,
+    "length": 9.75,
+    "short_line": 4.26,
+    "box": 1.6
+  },
+  "points": [
+    {
+      "name": "front_left_corner",
+      "image": [
+        0.32394,
+        0.53892
+      ],
+      "court": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "front_right_corner",
+      "image": [
+        0.73441,
+        0.53774
+      ],
+      "court": [
+        6.4,
+        0.0
+      ]
+    },
+    {
+      "name": "short_left",
+      "image": [
+        0.24934,
+        0.71816
+      ],
+      "court": [
+        0.0,
+        4.26
+      ]
+    },
+    {
+      "name": "short_right",
+      "image": [
+        0.80338,
+        0.7217
+      ],
+      "court": [
+        6.4,
+        4.26
+      ]
+    },
+    {
+      "name": "box_left_inner_front",
+      "image": [
+        0.38461,
+        0.72052
+      ],
+      "court": [
+        1.6,
+        4.26
+      ]
+    },
+    {
+      "name": "box_right_inner_front",
+      "image": [
+        0.66412,
+        0.7217
+      ],
+      "court": [
+        4.800000000000001,
+        4.26
+      ]
+    },
+    {
+      "name": "box_left_outer_back",
+      "image": [
+        0.21054,
+        0.80012
+      ],
+      "court": [
+        0.0,
+        5.859999999999999
+      ]
+    },
+    {
+      "name": "box_left_inner_back",
+      "image": [
+        0.3624,
+        0.80307
+      ],
+      "court": [
+        1.6,
+        5.859999999999999
+      ]
+    },
+    {
+      "name": "box_right_inner_back",
+      "image": [
+        0.67706,
+        0.80602
+      ],
+      "court": [
+        4.800000000000001,
+        5.859999999999999
+      ]
+    },
+    {
+      "name": "box_right_outer_back",
+      "image": [
+        0.82925,
+        0.80602
+      ],
+      "court": [
+        6.4,
+        5.859999999999999
+      ]
+    }
+  ],
+  "residuals_cm": [
+    13.1,
+    20.2,
+    11.6,
+    12.1,
+    14.3,
+    13.7,
+    9.2,
+    6.8,
+    5.7,
+    6.8
+  ]
+}

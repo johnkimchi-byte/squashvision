@@ -1,0 +1,16 @@
+{
+  "video": "C:\\Users\\John_\\Downloads\\Court 4 public\u29f8Bates  vs. Connecticut , Bates  vs. Connecticut - Trim.mp4",
+  "parameters": {
+    "quiet_speed": 0.9,
+    "min_break": 1.5,
+    "serve_bonus": 1.0
+  },
+  "fit": {
+    "reference_points": 47,
+    "train_f1": 0.383,
+    "heldout_f1": 0.333,
+    "heldout_precision": 0.481,
+    "heldout_recall": 0.26
+  },
+  "note": "train_f1 is fitted and scored on the same points; heldout_* is the honest figure."
+}

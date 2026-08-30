@@ -1,0 +1,249 @@
+{
+  "video": "C:/Users/John_/Downloads/squashvisiontest.mp4",
+  "marks": [
+    {
+      "time_s": 308.65,
+      "kind": "shot"
+    },
+    {
+      "time_s": 309.82,
+      "kind": "shot"
+    },
+    {
+      "time_s": 311.93,
+      "kind": "shot"
+    },
+    {
+      "time_s": 313.55,
+      "kind": "shot"
+    },
+    {
+      "time_s": 315.32,
+      "kind": "shot"
+    },
+    {
+      "time_s": 316.58,
+      "kind": "shot"
+    },
+    {
+      "time_s": 317.99,
+      "kind": "shot"
+    },
+    {
+      "time_s": 319.09,
+      "kind": "shot"
+    },
+    {
+      "time_s": 320.43,
+      "kind": "shot"
+    },
+    {
+      "time_s": 321.84,
+      "kind": "volley"
+    },
+    {
+      "time_s": 323.74,
+      "kind": "shot"
+    },
+    {
+      "time_s": 325.01,
+      "kind": "shot"
+    },
+    {
+      "time_s": 326.31,
+      "kind": "shot"
+    },
+    {
+      "time_s": 328.18,
+      "kind": "shot"
+    },
+    {
+      "time_s": 329.56,
+      "kind": "shot"
+    },
+    {
+      "time_s": 330.58,
+      "kind": "shot"
+    },
+    {
+      "time_s": 331.64,
+      "kind": "shot"
+    },
+    {
+      "time_s": 333.01,
+      "kind": "shot"
+    },
+    {
+      "time_s": 335.09,
+      "kind": "shot"
+    },
+    {
+      "time_s": 336.19,
+      "kind": "volley"
+    },
+    {
+      "time_s": 337.21,
+      "kind": "shot"
+    },
+    {
+      "time_s": 338.83,
+      "kind": "shot"
+    },
+    {
+      "time_s": 340.31,
+      "kind": "shot"
+    },
+    {
+      "time_s": 341.54,
+      "kind": "shot"
+    },
+    {
+      "time_s": 342.78,
+      "kind": "volley"
+    },
+    {
+      "time_s": 343.98,
+      "kind": "shot"
+    },
+    {
+      "time_s": 345.42,
+      "kind": "shot"
+    },
+    {
+      "time_s": 347.36,
+      "kind": "shot"
+    },
+    {
+      "time_s": 348.67,
+      "kind": "shot"
+    },
+    {
+      "time_s": 350.39,
+      "kind": "shot"
+    },
+    {
+      "time_s": 351.63,
+      "kind": "volley"
+    },
+    {
+      "time_s": 352.79,
+      "kind": "shot"
+    },
+    {
+      "time_s": 368.55,
+      "kind": "shot"
+    },
+    {
+      "time_s": 369.78,
+      "kind": "shot"
+    },
+    {
+      "time_s": 371.3,
+      "kind": "winner"
+    },
+    {
+      "time_s": 386.46,
+      "kind": "shot"
+    },
+    {
+      "time_s": 387.73,
+      "kind": "shot"
+    },
+    {
+      "time_s": 388.89,
+      "kind": "shot"
+    },
+    {
+      "time_s": 390.79,
+      "kind": "shot"
+    },
+    {
+      "time_s": 391.99,
+      "kind": "volley"
+    },
+    {
+      "time_s": 393.19,
+      "kind": "shot"
+    },
+    {
+      "time_s": 394.36,
+      "kind": "shot"
+    },
+    {
+      "time_s": 396.08,
+      "kind": "shot"
+    },
+    {
+      "time_s": 397.11,
+      "kind": "winner"
+    },
+    {
+      "time_s": 401.48,
+      "kind": "game"
+    },
+    {
+      "time_s": 543.8,
+      "kind": "volley"
+    },
+    {
+      "time_s": 544.93,
+      "kind": "shot"
+    },
+    {
+      "time_s": 545.7,
+      "kind": "volley"
+    },
+    {
+      "time_s": 547.82,
+      "kind": "shot"
+    },
+    {
+      "time_s": 549.12,
+      "kind": "shot"
+    },
+    {
+      "time_s": 550.29,
+      "kind": "winner"
+    },
+    {
+      "time_s": 561.43,
+      "kind": "volley"
+    },
+    {
+      "time_s": 562.84,
+      "kind": "shot"
+    },
+    {
+      "time_s": 564.92,
+      "kind": "shot"
+    },
+    {
+      "time_s": 566.4,
+      "kind": "volley"
+    },
+    {
+      "time_s": 567.21,
+      "kind": "shot"
+    },
+    {
+      "time_s": 568.12,
+      "kind": "winner"
+    },
+    {
+      "time_s": 583.81,
+      "kind": "shot"
+    },
+    {
+      "time_s": 585.05,
+      "kind": "shot"
+    },
+    {
+      "time_s": 586.03,
+      "kind": "volley"
+    },
+    {
+      "time_s": 587.34,
+      "kind": "winner"
+    }
+  ]
+}

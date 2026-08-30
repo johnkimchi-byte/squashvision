@@ -1,0 +1,169 @@
+{
+  "video": "C:\\Users\\John_\\Downloads\\Court 4 public\u29f8Bates  vs. Connecticut , Bates  vs. Connecticut - Trim.mp4",
+  "court": {
+    "width": 6.4,
+    "length": 9.75,
+    "short_line": 4.26,
+    "box": 1.6
+  },
+  "points": [
+    {
+      "name": "front_left_corner",
+      "image": [
+        0.32669,
+        0.53241
+      ],
+      "court": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "front_right_corner",
+      "image": [
+        0.7362,
+        0.5375
+      ],
+      "court": [
+        6.4,
+        0.0
+      ]
+    },
+    {
+      "name": "short_left",
+      "image": [
+        0.24544,
+        0.71759
+      ],
+      "court": [
+        0.0,
+        4.26
+      ]
+    },
+    {
+      "name": "short_right",
+      "image": [
+        0.80339,
+        0.72315
+      ],
+      "court": [
+        6.4,
+        4.26
+      ]
+    },
+    {
+      "name": "box_left_inner_front",
+      "image": [
+        0.38294,
+        0.7206
+      ],
+      "court": [
+        1.6,
+        4.26
+      ]
+    },
+    {
+      "name": "box_right_inner_front",
+      "image": [
+        0.66315,
+        0.72361
+      ],
+      "court": [
+        4.800000000000001,
+        4.26
+      ]
+    },
+    {
+      "name": "box_left_outer_back",
+      "image": [
+        0.21016,
+        0.79699
+      ],
+      "court": [
+        0.0,
+        5.859999999999999
+      ]
+    },
+    {
+      "name": "box_right_outer_back",
+      "image": [
+        0.83372,
+        0.80833
+      ],
+      "court": [
+        6.4,
+        5.859999999999999
+      ]
+    },
+    {
+      "name": "box_left_inner_back",
+      "image": [
+        0.3638,
+        0.80417
+      ],
+      "court": [
+        1.6,
+        5.859999999999999
+      ]
+    },
+    {
+      "name": "box_right_inner_back",
+      "image": [
+        0.67682,
+        0.80625
+      ],
+      "court": [
+        4.800000000000001,
+        5.859999999999999
+      ]
+    },
+    {
+      "name": "tee",
+      "image": [
+        0.52292,
+        0.72199
+      ],
+      "court": [
+        3.2,
+        4.26
+      ]
+    },
+    {
+      "name": "back_left_corner",
+      "image": [
+        0.12891,
+        0.97662
+      ],
+      "court": [
+        0.0,
+        9.75
+      ]
+    },
+    {
+      "name": "back_right_corner",
+      "image": [
+        0.89948,
+        0.99213
+      ],
+      "court": [
+        6.4,
+        9.75
+      ]
+    }
+  ],
+  "residuals_cm": [
+    125.2,
+    121.8,
+    19.2,
+    14.2,
+    21.2,
+    19.3,
+    36.9,
+    40.6,
+    46.6,
+    41.2,
+    19.9,
+    42.1,
+    40.0
+  ]
+}
