@@ -1,31 +1,41 @@
 # squashvision — brief 4: shot-type classification
 
 Label each detected shot with what kind of shot it was, so a match becomes a
-searchable directory of clips. **Not deferred, but gated**: T4 is a hard
-decision gate and S0's fourth precondition is not currently met.
+searchable directory of clips. **Not deferred; T4 is a hard decision gate.**
 
 The obstacle is not the classifier. It is that every feature anyone would
 reach for is a *difference between two detected shots*, computed on top of a
-detector whose misses correlate with the label being predicted. This brief
-removes that coupling first and only then fits anything.
+detector that misses 43% of them. This brief removes that coupling first and
+only then fits anything.
+
+**This is now measured, not argued** — see S3. The same feature scores r =
+−0.205 from hand-marked instants and −0.010 from detected ones, and tripling
+the label set moved the volley classifier *backwards*.
 
 ## S0 · Preconditions — check before starting
 
 1. Briefs 1 and 2 are complete. **Holds** — `rally/shots.py` and
    `fit/volleys.py` exist with held-out scores recorded.
-2. `labels.json` exists with hand-marked shot instants. **Holds** — 61 marks
-   (45 shot, 10 volley, 5 winner, 1 game).
+2. `labels.json` exists with hand-marked shot instants. **Holds** — 174 marks
+   (145 shot, 20 volley, 8 winner, 1 game) spanning t=2.93–587.34, in **20
+   rally clusters** (shot-equivalents grouped at a >4 s gap; the count is
+   stable for gaps 3–6 s). Eight clusters end in a `winner` mark.
+   *Check before relying on the count:* brief 1 found 4 of 9 detected rallies
+   were break artifacts, so verify these 20 against `scoredigits` rather than
+   assuming 20 real points.
 3. You accept that the deliverable taxonomy is the collapsed set in S4, not
    the full squash taxonomy. Drop-vs-kill and boast-vs-cross-drop are not
    recoverable here at any level of effort — see S2.
-4. **A second recording usable at shot granularity exists.** *Does not
-   currently hold.* `squashvisiontest.mp4` is the only shot-capable video;
-   the Connecticut encode is 15 fps and rally-scale only. T4 holds out by
-   match, and brief 2 established that holding out by rally on five rallies
-   produces a meaningless number. **Acquiring a second match is a hard
-   prerequisite for T4, and it is the long-lead item — start it first.**
+4. **A second recording usable at shot granularity.** *Wanted, no longer
+   blocking.* At 61 marks across 5 rallies, hold-out-by-rally was meaningless
+   and only a second match could gate T4. With 20 clusters it is a legitimate
+   if weaker gate. A second match still buys the one thing rally-holdout
+   cannot — generalisation across camera, calibration and encode — so treat it
+   as the strongest available evidence at T4, not as a precondition for
+   starting.
 
-T1–T3 can proceed while that footage is being obtained. T4 cannot.
+T1–T3 proceed regardless. T4 runs on rally-holdout when no second match
+exists, and says which it used when reporting.
 
 ## S1 · Goal
 
@@ -86,12 +96,26 @@ New, settled by this brief:
 **Shot timing, against 60 shot-equivalent hand labels at tolerance 1.0 s:**
 precision **0.67**, recall **0.57** (34 matched, 17 false, 26 missed).
 
-**Volley classification**, the existing instance of type-from-position-only:
-held-out precision **0.10**, recall **0.22**; fitted-on-everything 1.00/0.14.
-Brief 2 diagnosed the cause as the five-rally ceiling, not the classifier.
+**Volley classification**, the existing instance of features-across-two-shots.
+Two runs, same code, same video:
 
-**Only 5 of the 9 rallies** `find_rallies` reports across t=300–590 are real
-points (indices 1, 2, 3, 7, 8). The rest are break artifacts.
+| labels | rallies | matched | held-out P/R | fitted P/R |
+|---|---|---|---|---|
+| 61 (brief 2) | 5 real | — | 0.10 / 0.22 | 1.00 / 0.14 |
+| 174 (full video, t=0–596) | 18 detected | 102 | **0.03 / 0.17** | 0.00 / 0.00 |
+
+**Tripling the labels made it worse.** Brief 2 recorded the cause as the
+five-rally ceiling — "no further labelling within them can fix" it. Labelling
+*outside* them, 5 → 18 rallies and 61 → 174 marks, moved held-out P/R
+backwards. **Label quantity was never the blocker**, and that diagnosis is
+withdrawn.
+
+Also from that run: **only 102 of 173 hand-marked shots matched a detected
+shot** within 1.0 s. 41% of the labelling effort never reaches the fit.
+
+**Only 5 of the 9 rallies** `find_rallies` reported across t=300–590 in brief
+1 were real points (indices 1, 2, 3, 7, 8); the rest were break artifacts. The
+full-video run reports 18 — unverified against the board.
 
 **Tracks:** both-players-resolved 73% / 77% at stride 1 / 2 (stride 4 disputed,
 65% and 78% both in the record). ~20–27% of detections coasted. ~15% of rally
@@ -111,15 +135,65 @@ false alarm; of the rest, ~43% have a miss breaking the adjacency; plus false
 alarms landing between two true detections — **roughly one row in four**. This
 is an estimate from recorded numbers, *not a measurement*. T1 measures it.
 
-**The misses are label-correlated.** `MIN_PROMINENCE = 0.4` m, `MIN_SHOT_GAP =
-0.4` s and a 0.3 s smoothing window preferentially discard small, brief
-excursions: a volley taken at the body near the T, a counter-drop, a tight
-front-court exchange. A lunging retrieval to the back corner always survives.
-So the surviving "drop" examples are disproportionately the drops that beat a
-stranded opponent, and a model fitted on them learns *"drop = opponent made a
-big excursion"* — a fact about the rally situation, not about the shot. This is
-missingness conditional on the target. More data scales it rather than diluting
-it.
+### Measured: the same feature, from two sources
+
+`interval_norm` — time since the previous shot, normalised by that rally's
+median — computed on identical labels and footage, differing only in where the
+shot instants came from:
+
+| Instants from | point-biserial r vs volley | mean | sd |
+|---|---|---|---|
+| Hand marks (`labels.json`) | **−0.205** | 1.052 | 0.328 |
+| Detected (`shots.csv`) | **−0.010** | 1.396 | 1.900 |
+
+The hand figure is r = −0.205, 95% CI **[−0.337, −0.114]** (cluster bootstrap
+over rallies, 4000 reps, negative in 100% of them), stable at −0.246 to −0.205
+across clustering gaps of 3–6 s. The detected figure is indistinguishable from
+zero and lies outside that interval.
+
+−0.205 puts `interval_norm` level with `depth_short` (−0.244) and
+`depth_median` (−0.212). **It is not a weak feature. It is a feature of
+ordinary strength that the detector deletes.**
+
+The distribution shows the mechanism directly: a median-normalised interval
+must centre near 1.0, and the hand series does (1.052, sd 0.328). The detected
+series sits 33% high with six times the spread — missed predecessors doubling
+intervals.
+
+Note also `depth_short` and `depth_median` are collinear at r = 0.97, which
+flips `depth_median`'s sign in the multivariate fit (−0.494 refit alone). So
+the four features were really two, and one of the two was broken.
+
+**Correction to an earlier claim in this brief.** This section previously
+argued the misses are *label-correlated* — that `MIN_PROMINENCE = 0.4` m,
+`MIN_SHOT_GAP = 0.4` s and the 0.3 s smoothing window preferentially discard
+the small brief excursions that volleys and counter-drops produce. Measured,
+the effect is not there at this sample size: volleys matched a detected shot
+11/20 (55%), non-volleys 91/153 (59.5%). **The destruction above is fully
+accounted for by uniform adjacency breakage** — ~41% of predecessors missing
+is enough on its own. The mechanism remains plausible and worth measuring
+per-type at T5, but do not treat it as established, and do not build on it.
+
+### One-instant features are immune to missing shots, not to mistimed ones
+
+Measured while rebuilding the volley feature set. `radial_v` (rate of change
+of the striker's distance from the T) and `out_reach` (how far above its
+recent minimum it sits) come from the continuous tracks, so no missing shot
+can break them — the premise of S1. But they are *read at* the shot instant,
+and a 1.0 s matching tolerance lets that instant sit well away from the strike:
+
+| feature | hand instants | detected instants |
+|---|---|---|
+| `radial_v` | −0.391 | −0.239 |
+| `out_reach` | −0.369 | −0.215 |
+
+Roughly 40% of the signal, lost to mistiming alone, with no adjacency involved.
+
+**So S1's move removes one failure mode and not the other.** Features from one
+instant plus the tracks are safe from *adjacency breakage*; they stay sensitive
+to *instant accuracy*. T5's timing work is therefore load-bearing for the
+feature quality, not only for recall — and T2's `quality` flag should carry a
+timing confidence beside its `solid` fraction.
 
 ### One miss costs two shots, and they are adjacent
 
@@ -150,12 +224,13 @@ adjacencies.
 
 ### What would legitimately trigger brief 3
 
-The window approach in T2 removes *detector*-induced bias. It does not remove
+The window approach in T2 removes the adjacency dependence. It does not remove
 *tracker*-induced bias: the ~15% unsplittable merges concentrate in tight
-front-court exchanges, which is type-correlated in the same direction. If T5's
-type-conditional recall stays non-uniform **and the residual is attributable to
-merges**, that is evidence-driven grounds to start brief 3. "The detector could
-be better" is not.
+front-court exchanges, which may well be type-correlated — though note the
+volley measurement above found no such effect for the detector, so treat this
+as a hypothesis, not a known. If T5's type-conditional recall is non-uniform
+**and the residual is attributable to merges**, that is evidence-driven grounds
+to start brief 3. "The detector could be better" is not.
 
 ## S4 · The taxonomy — label rich, train collapsed
 
@@ -283,7 +358,9 @@ player `p`, opponent `q = 1 - p`:
 - `striker_recovery` — `p`'s court velocity just after `t`.
 - `quality` — fraction of `solid[q][k]` true over `[t, t*]`, and whether the
   apex sample itself is solid. A destination read off coasted samples is
-  inferred, and the row says so.
+  inferred, and the row says so. **Also carry a timing confidence**: S3 shows
+  one-instant features lose ~40% of their signal to a mistimed instant even
+  though no adjacency is involved, so `solid` alone does not describe the row.
 
 **The interface takes instants, not a CSV** — hand marks from `label.py` and
 rows from `shots.csv` both go in the same way. This is what makes T4 possible,
@@ -306,16 +383,17 @@ Label the full t=300–400 and t=505–590 spans, and the second match from S0.4
 DONE: label count per type, per match; and the count in the four collapsed
 classes, so T4 knows its base rate before fitting anything.
 
-### T4 — DECISION GATE: does the concept work at all · needs: T2, T3, S0.4
+### T4 — DECISION GATE: does the concept work at all · needs: T2, T3
 
 Fit the four collapsed classes on **hand-marked instants only**. `shots.py` is
-not in this loop. Ridge multinomial logistic in numpy, held out **by match**.
+not in this loop. Ridge multinomial logistic in numpy, held out **by match if a
+second match exists, otherwise by rally** over S0.2's 20 clusters. State which.
 
 Report the confusion matrix, not just accuracy — which classes collapse into
 which is the actual finding, and it defines the taxonomy the sensors support.
 
-- **Go** — beats base rate by a clear margin held out by match, on features
-  whose `quality` flag is clean.
+- **Go** — beats base rate by a clear margin held out, on features whose
+  `quality` flag is clean.
 - **No-go** — the concept does not survive on clean features, and no detector
   work will rescue it. Record the confusion matrix and stop. This costs a few
   hundred labels rather than a few thousand, which is the entire point of
@@ -377,8 +455,11 @@ figure to quote.
 
 ## S10 · Do not
 
-- Do not start T4 before a second shot-capable match exists.
 - Do not build any feature that requires two detections.
+- Do not read T4's rally-holdout as evidence of cross-camera generalisation.
+  Say which hold-out was used.
+- Do not answer a poor score by labelling more. That was tried: 61 → 174 marks
+  moved held-out P/R backwards (S3).
 - Do not fit anything on `shots.csv` instants before T4 has passed on hand ones.
 - Do not report overall recall as T5's gate; it hides the bias that motivated
   the brief.

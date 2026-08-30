@@ -75,6 +75,12 @@ cli.py  overlay.py     shared: argument plumbing, palette, drawing
 | `squashvisiontest.mp4` — 28.365 fps, 3016×1696 | **Shot-level work.** Play t=300–400, t=505–590; break t=405–505. No roster or profile; module defaults are correct. Court: `profiles/bates_court.json` (11.3 cm residual). |
 | `Court 4 public⧸Bates vs. Connecticut…mp4` — 15 fps, 1920×1080 | Rally-scale only. Half-rate, unusable below rally granularity. Uses `conn_profile.json` + `conn_roster.json`; `mycourt.json` is poor (45.2 cm). |
 
+The t=300–400 / t=505–590 spans above are the *measured* ones, not the only play.
+`labels.json` now carries hand-marked shots from t=2.93 to t=587.34 in 20 rally
+clusters, 8 of them ending in a `winner`. Verify against `scoredigits` before
+treating those as 20 real points — brief 1 found 4 of 9 detected rallies were
+break artifacts.
+
 Detection profiles are **per camera *and* per encode** — a re-encode at another
 resolution needs its own. Court calibrations transfer between recordings of the
 same camera. Rosters are per match.
@@ -120,16 +126,21 @@ favourably. Stride 1 only where temporal resolution is the actual constraint.
 - **A player who stops moving disappears.** Background subtraction only sees what
   moved. This explains `loitering()`, the `IDENTITY_MEMORY` averaging, and most
   coasted detections. It is the detector's central weakness.
-- **Anything computed across two rows of `shots.csv` is contaminated.** Shot timing
-  is precision 0.67 / recall 0.57 at tolerance 1.0 s, and a miss does not blank a
-  row — it splices two non-adjacent shots into an apparent adjacency, giving a
-  destination one shot too far downstream and a doubled interval, with nothing
-  raised. The misses are also *label-correlated*: `MIN_PROMINENCE` and
-  `MIN_SHOT_GAP` discard small brief excursions, which are volleys, counter-drops
-  and tight front-court exchanges. And `find_shots`'s out-of-turn drop means one
-  miss costs two **adjacent** shots. Estimated one row in four carries correct
-  cross-row features. Build features from one instant plus the continuous tracks
-  instead. See `HANDOFF_4_shot_type.md` S3.
+- **Anything computed across two rows of `shots.csv` is contaminated — measured.**
+  Shot timing is precision 0.67 / recall 0.57 at tolerance 1.0 s, and a miss does
+  not blank a row: it splices two non-adjacent shots into an apparent adjacency,
+  giving a destination one shot too far downstream and a doubled interval, with
+  nothing raised. `find_shots`'s out-of-turn drop additionally means one miss
+  costs two **adjacent** shots. The size of it: `interval_norm` scores r = −0.205
+  (95% CI [−0.337, −0.114]) against the volley label from hand-marked instants
+  and **−0.010** from detected ones — same labels, same footage. Its distribution
+  should centre at 1.0 and does from hand marks (mean 1.052, sd 0.328) but sits at
+  mean 1.396, sd 1.900 from detected ones. Build features from one instant plus
+  the continuous tracks instead. See `HANDOFF_4_shot_type.md` S3.
+- **More labels will not fix a features problem.** `labels.json` went 61 → 174
+  marks and 5 → 20 rally clusters; the volley classifier's held-out P/R moved
+  0.10/0.22 → **0.03/0.17**. Also, 41% of hand marks currently match no detected
+  shot and never reach a fit — check that before commissioning more labelling.
 - **Disputed number:** both-players-resolved at stride 4 appears in the record as
   both 65% and 78% — probably measured through different pipeline stages
   (`P.summarise()` counts raw per-frame slots; `cli.analyse_in_court` reports after
@@ -144,6 +155,7 @@ favourably. Stride 1 only where temporal resolution is the actual constraint.
 - `HANDOFF_3_segmentation.md` — **deferred**. Swapping background subtraction for
   instance segmentation, with a go/no-go gate. Read its S0 preconditions before
   starting any of it.
-- `HANDOFF_4_shot_type.md` — **gated, not started**. Shot-type classification,
-  and the feature contamination that blocks it. Its S0.4 precondition (a second
-  shot-capable recording) is not currently met.
+- `HANDOFF_4_shot_type.md` — **not started; preconditions met**. Shot-type
+  classification, and the feature contamination that blocks it. S3 carries the
+  measured evidence for that contamination and supersedes brief 2's account of
+  why the volley classifier scores badly.

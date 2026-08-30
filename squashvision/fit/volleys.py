@@ -12,17 +12,37 @@ tracking ever sees them (observed maxima 103/109px against a 110 ceiling).
 So it is not used as a feature at all, rather than included and expected to
 carry weight it cannot.
 
-Three features, all derived from `shots.py` output and court geometry:
+Four features, from the shot instant plus the striker's recent track:
 
   depth_short   -- shot depth relative to the short line (metres; +back)
-  depth_median  -- shot depth relative to *this rally's* median shot depth,
-                   which separates a genuinely short ball from a player whose
-                   whole rally was played deep
   interval_norm -- time since the previous shot in the rally, normalised by
                    that rally's median inter-shot interval; a volley takes
                    time away from the opponent, so this runs low
-  forward_vy    -- the player's court-y velocity at the shot, metres/second
-                   toward the front wall; positive means still closing in
+  radial_v      -- rate of change of the striker's distance from the T over
+                   REACH_WINDOW of history; negative means they were not
+                   travelling outward when they struck
+  out_reach     -- how far above their recent minimum that distance sits: how
+                   far out they came to reach this ball
+
+`radial_v` and `out_reach` describe the *shape* of the excursion, which is
+the quantity `shots.MIN_PROMINENCE` currently spends on rejecting candidates.
+Measured on 117 hand-marked shots (14 volleys) they are the two strongest
+predictors available -- point-biserial -0.391 and -0.369, against -0.245 for
+depth_short and -0.256 for interval_norm.
+
+Two features were dropped on measurement, not taste.  `depth_median` (depth
+against the rally's own median) correlates with `depth_short` at r = 0.97,
+carries no separate information, and its sign flips in the multivariate fit.
+`forward_vy` (court-y velocity at the shot) is noise: +0.063 on detected
+instants, -0.015 on hand-marked ones -- not even a stable sign.
+
+Also measured and rejected, so they are not retried: every opponent-derived
+feature (opponent depth, distance between players, who is further forward,
+opponent distance from the T) scores |r| <= 0.17, and a model built from them
+alone reaches AP 0.165 against a 0.12 floor.  So does the incoming ball path
+approximated by the opponent's last radial apex before the shot: |r| <= 0.15,
+AP 0.202 alone.  Squash is a two-body game but volleys, measured here, are
+not a two-body signal.
 
 A serve (a rally's first shot) has no previous interval and is never a
 volley by definition, so it is excluded from training rather than given a
@@ -39,12 +59,23 @@ Held out **by rally**, not by time block like `train.py`: a rally's shots
 share a court position and pace, so leaving one in both train and test folds
 would let the model partly memorise it rather than generalise.
 
+Scored by **average precision on pooled held-out predictions**, not by
+precision and recall averaged over folds.  Two failures that avoids.  A fold
+predicting no positives scores precision 0.0 through `_prf` -- "abstained"
+read as "wrong" -- and averaging it in understates the model: measured here,
+0.03 averaged against ~0.09 pooled.  And a 0.5 threshold is close to
+meaningless on an 11%-positive class, where ridge logistic predicts
+all-negative by construction; ranking is what a searchable shot directory
+consumes anyway.  Average precision must always be quoted against the
+positive rate, which is its no-skill floor.
+
     python -m squashvision volleys VIDEO --labels labels.json --out volley_config.json
 """
 
 from __future__ import annotations
 
 import json
+import math
 import statistics
 from dataclasses import dataclass
 
@@ -62,29 +93,50 @@ FOLDS = 3
 MIN_LABELS = 8               # too few to hold out even one fold sensibly
 MARK_TOLERANCE = 1.0         # seconds a hand mark may be off a detected shot
 
+# Reporting points for precision@k, not a tuned threshold: a person scanning a
+# ranked clip list looks at a screenful.  With ~100 held-out shots and ~11%
+# positives, k=5/10/20 spans "the top of the list" to "a fifth of it".
+PRECISION_AT = (5, 10, 20)
+
+# History used by radial_v and out_reach.  Set to the median hand-marked
+# inter-shot interval (1.3 s) rounded down, so the window spans one excursion
+# without reaching back into the previous shot's.  Not swept: at 14 positives
+# the held-out score cannot separate nearby values, so a sweep would be
+# fitting noise.  Sweep it when more volleys are labelled.
+REACH_WINDOW = 1.0           # seconds
+
 
 @dataclass
 class Fitted:
-    weights: list            # [intercept, w_depth_short, w_depth_median, w_interval, w_vy]
+    weights: list            # [intercept, w_depth_short, w_interval, w_radial_v, w_out_reach]
     mean: list
     std: list
     train_precision: float
     train_recall: float
+    train_ap: float
     heldout_precision: float
     heldout_recall: float
+    heldout_ap: float        # the figure to quote; compare against base_rate
+    heldout_at_k: dict       # k -> precision among the top k ranked shots
+    base_rate: float         # positive share = what average precision must beat
     labelled: int
     positive: int
 
 
-def _velocity_y(track, k: int, dt: float):
-    n = len(track)
-    if 0 < k < n - 1 and track[k - 1] is not None and track[k + 1] is not None:
-        return (track[k + 1][1] - track[k - 1][1]) / (2 * dt)
-    if k + 1 < n and track[k] is not None and track[k + 1] is not None:
-        return (track[k + 1][1] - track[k][1]) / dt
-    if k - 1 >= 0 and track[k] is not None and track[k - 1] is not None:
-        return (track[k][1] - track[k - 1][1]) / dt
-    return None
+def _reach(track, tee, k: int, k_start: int, dt: float):
+    """(radial_v, out_reach) from REACH_WINDOW of the striker's history, or None.
+
+    Both describe the excursion the striker was on when they struck.  The
+    window is clipped at `k_start` -- the rally's first sample -- so a shot
+    early in a rally never reads its history out of the break before it, where
+    the players are wandering and the radial series means nothing.
+    """
+    span = max(1, int(round(REACH_WINDOW / dt)))
+    lo = max(k_start, k - span)
+    history = [math.dist(p, tee) for p in track[lo:k + 1] if p is not None]
+    if len(history) < 2:
+        return None
+    return (history[-1] - history[0]) / REACH_WINDOW, history[-1] - min(history)
 
 
 def _nearest_index(samples, k0: int, k1: int, t: float) -> int:
@@ -109,8 +161,7 @@ def build_features(samples, tracks, court, rallies_found, shots_found, dt):
         if not idxs:
             continue
         k0, k1 = idxs[0], idxs[-1] + 1
-        depths = [s.position_m[1] for s in group]
-        median_depth = statistics.median(depths)
+        tee = (court.spec.half, court.spec.short_line)
         intervals = [b.time_s - a.time_s for a, b in zip(group, group[1:])]
         median_interval = statistics.median(intervals) if intervals else None
         for pos, shot in enumerate(group):
@@ -119,15 +170,16 @@ def build_features(samples, tracks, court, rallies_found, shots_found, dt):
                 continue
             interval = shot.time_s - group[pos - 1].time_s
             k = _nearest_index(samples, k0, k1, shot.time_s)
-            vy = _velocity_y(tracks[shot.player], k, dt)
-            if vy is None:
+            reach = _reach(tracks[shot.player], tee, k, k0, dt)
+            if reach is None:
                 rows.append((ridx, shot, None))
                 continue
+            radial_v, out_reach = reach
             features = [
                 shot.position_m[1] - court.spec.short_line,
-                shot.position_m[1] - median_depth,
                 interval / median_interval,
-                -vy,             # y grows toward the back wall; flip so + = forward
+                radial_v,
+                out_reach,
             ]
             rows.append((ridx, shot, features))
     return rows
@@ -177,14 +229,65 @@ def _prf(y_true, y_pred):
     return precision, recall
 
 
+def average_precision(y_true, score) -> float:
+    """Mean precision at the rank of each positive -- area under the PR curve.
+
+    The headline metric, in place of precision/recall at a 0.5 threshold.
+    That threshold is close to meaningless on a class this rare: ridge
+    logistic on an 11%-positive set parks the intercept low and predicts
+    all-negative, which `_prf` reports as precision 0.0 -- indistinguishable
+    from a model that predicted positives and got them all wrong.  Measured
+    on the full label set, the fit scored 0.00/0.00 at 0.5 while still
+    ranking well above chance.
+
+    Ranking is also what the tool actually consumes: a searchable directory
+    of shots wants "most likely first", never a hard yes/no.
+
+    The no-skill value is the positive rate, so never quote this without it.
+    """
+    score = np.asarray(score, dtype=float)
+    order = np.argsort(-score, kind="mergesort")
+    y = np.asarray(y_true, dtype=float)[order]
+    total = y.sum()
+    if total == 0:
+        return 0.0
+    hits = np.cumsum(y) / np.arange(1, len(y) + 1)
+    return float((hits * y).sum() / total)
+
+
+def precision_at_k(y_true, score, k: int) -> float:
+    """Share of the top k ranked shots that are really positive.
+
+    What a person scanning a ranked clip list actually experiences.
+    """
+    score = np.asarray(score, dtype=float)
+    order = np.argsort(-score, kind="mergesort")[:k]
+    y = np.asarray(y_true, dtype=float)[order]
+    return float(y.mean()) if len(y) else 0.0
+
+
 def cross_validate_by_rally(rally_ids, X, y, folds: int = FOLDS, l2: float = L2):
-    """Fit on some rallies, score on the rallies left out."""
+    """Fit on some rallies, predict the rallies left out, and **pool** the result.
+
+    Returns (held_out_y, held_out_score, per_fold).  The pooling is the point.
+    The first version scored each fold with `_prf` and averaged, which is a
+    broken estimator here: `_prf` returns precision 0.0 when a fold predicts
+    no positives at all, so an abstaining fold is scored identically to a
+    wrong one.  Measured on the 174-label set, two of three folds predicted
+    nothing and the averaged precision came out **0.03** where pooling the
+    same predictions gives ~0.09 -- a threefold difference produced entirely
+    by the estimator, not the model.
+
+    Pooling also puts every held-out shot into one ranking, which is what
+    `average_precision` and `precision_at_k` need; a per-fold ranking of
+    twenty-odd shots is too short to mean anything.
+    """
     unique = sorted(set(rally_ids))
     if len(unique) < 2:
-        return []
+        return np.array([]), np.array([]), []
     fold_of = {r: i % folds for i, r in enumerate(unique)}
-    scores = []
     rally_ids = np.array(rally_ids)
+    pooled_y, pooled_score, per_fold = [], [], []
     for f in range(folds):
         test_mask = np.array([fold_of[r] == f for r in rally_ids])
         train_mask = ~test_mask
@@ -195,11 +298,15 @@ def cross_validate_by_rally(rally_ids, X, y, folds: int = FOLDS, l2: float = L2)
         mean, std = X[train_mask].mean(axis=0), X[train_mask].std(axis=0)
         std[std < 1e-9] = 1.0
         beta = fit_logistic((X[train_mask] - mean) / std, y[train_mask], l2)
-        pred = (predict(beta, (X[test_mask] - mean) / std) >= 0.5).astype(int)
-        precision, recall = _prf(y[test_mask], pred)
-        scores.append({"fold": f, "precision": precision, "recall": recall,
-                       "n": int(test_mask.sum())})
-    return scores
+        score = predict(beta, (X[test_mask] - mean) / std)
+        pooled_y.append(y[test_mask])
+        pooled_score.append(score)
+        per_fold.append({"fold": f, "n": int(test_mask.sum()),
+                         "positive": int(y[test_mask].sum()),
+                         "predicted": int((score >= 0.5).sum())})
+    if not pooled_y:
+        return np.array([]), np.array([]), []
+    return np.concatenate(pooled_y), np.concatenate(pooled_score), per_fold
 
 
 def fit(rows, folds: int = FOLDS, l2: float = L2) -> tuple[Fitted, list] | None:
@@ -208,37 +315,56 @@ def fit(rows, folds: int = FOLDS, l2: float = L2) -> tuple[Fitted, list] | None:
     y = np.array([r[1] for r in rows], dtype=float)
     X = np.array([r[2] for r in rows], dtype=float)
 
-    scores = cross_validate_by_rally(rally_ids, X, y, folds, l2)
+    ho_y, ho_score, per_fold = cross_validate_by_rally(rally_ids, X, y, folds, l2)
     mean, std = X.mean(axis=0), X.std(axis=0)
     std[std < 1e-9] = 1.0
     beta = fit_logistic((X - mean) / std, y, l2)
-    pred = (predict(beta, (X - mean) / std) >= 0.5).astype(int)
-    train_p, train_r = _prf(y, pred)
+    train_score = predict(beta, (X - mean) / std)
+    train_p, train_r = _prf(y, (train_score >= 0.5).astype(int))
+
+    # Pooled across folds, then scored once -- see cross_validate_by_rally.
+    if len(ho_y):
+        ho_p, ho_r = _prf(ho_y, (ho_score >= 0.5).astype(int))
+        ho_ap = average_precision(ho_y, ho_score)
+        at_k = {k: precision_at_k(ho_y, ho_score, k) for k in PRECISION_AT}
+    else:
+        ho_p = ho_r = ho_ap = 0.0
+        at_k = {k: 0.0 for k in PRECISION_AT}
 
     fitted = Fitted(
         weights=beta.tolist(), mean=mean.tolist(), std=std.tolist(),
         train_precision=train_p, train_recall=train_r,
-        heldout_precision=statistics.fmean(s["precision"] for s in scores) if scores else 0.0,
-        heldout_recall=statistics.fmean(s["recall"] for s in scores) if scores else 0.0,
+        train_ap=average_precision(y, train_score),
+        heldout_precision=ho_p, heldout_recall=ho_r, heldout_ap=ho_ap,
+        heldout_at_k=at_k,
+        base_rate=float(ho_y.mean()) if len(ho_y) else float(y.mean()),
         labelled=len(rows), positive=int(y.sum()),
     )
-    return fitted, scores
+    return fitted, per_fold
 
 
 def save(path: str, video: str, fitted: Fitted) -> None:
     blob = {
         "video": video,
-        "features": ["depth_short", "depth_median", "interval_norm", "forward_vy"],
+        "features": ["depth_short", "interval_norm", "radial_v", "out_reach"],
         "weights": fitted.weights, "mean": fitted.mean, "std": fitted.std,
         "fit": {
             "labelled_shots": fitted.labelled, "positive": fitted.positive,
+            "base_rate": round(fitted.base_rate, 3),
             "train_precision": round(fitted.train_precision, 3),
             "train_recall": round(fitted.train_recall, 3),
+            "train_average_precision": round(fitted.train_ap, 3),
             "heldout_precision": round(fitted.heldout_precision, 3),
             "heldout_recall": round(fitted.heldout_recall, 3),
+            "heldout_average_precision": round(fitted.heldout_ap, 3),
+            "heldout_precision_at_k": {str(k): round(v, 3)
+                                       for k, v in fitted.heldout_at_k.items()},
         },
-        "note": "train_* is fitted and scored on the same shots; heldout_* "
-                "(held out by rally) is the honest figure to quote.",
+        "note": "quote heldout_average_precision, against base_rate as the "
+                "no-skill floor.  train_* is fitted and scored on the same "
+                "shots and is optimistic.  heldout_precision/recall are at a "
+                "0.5 threshold, which is near-meaningless on a class this "
+                "rare -- kept only for comparison with older runs.",
     }
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(blob, fh, indent=2)
@@ -298,15 +424,22 @@ def main(argv=None) -> None:
             "with `squashvision label --volley SECONDS --shot SECONDS`, or "
             "interactively with the v/s keys." % (len(labelled), MIN_LABELS))
 
-    fitted, scores = fit(labelled, args.folds, args.l2)
-    print("\nper fold (fitted without that rally block, scored on it):")
-    for s in scores:
-        print("   fold %d  n=%d  precision %.2f  recall %.2f"
-              % (s["fold"], s["n"], s["precision"], s["recall"]))
-    print("\nheld-out precision %.2f, recall %.2f   <- quote this one"
-          % (fitted.heldout_precision, fitted.heldout_recall))
-    print("fitted-on-everything precision %.2f, recall %.2f  <- optimistic, do not quote"
-          % (fitted.train_precision, fitted.train_recall))
+    fitted, per_fold = fit(labelled, args.folds, args.l2)
+    print("\nper fold (fitted without that rally block, predicted on it):")
+    for s in per_fold:
+        print("   fold %d  n=%-3d  positives %-3d  predicted positive at 0.5: %d"
+              % (s["fold"], s["n"], s["positive"], s["predicted"]))
+
+    print("\nheld out by rally, predictions pooled across folds and scored once:")
+    print("   average precision %.3f   <- quote this one (no-skill floor %.3f)"
+          % (fitted.heldout_ap, fitted.base_rate))
+    for k in sorted(fitted.heldout_at_k):
+        print("   precision@%-3d      %.3f" % (k, fitted.heldout_at_k[k]))
+    print("   precision %.2f, recall %.2f at a 0.5 threshold  -- near-meaningless "
+          "on a %.0f%% class, kept for comparison only"
+          % (fitted.heldout_precision, fitted.heldout_recall, 100 * fitted.base_rate))
+    print("\nfitted on everything: average precision %.3f  <- optimistic, do not quote"
+          % fitted.train_ap)
 
     save(args.out, args.video, fitted)
     print("saved -> %s" % args.out)

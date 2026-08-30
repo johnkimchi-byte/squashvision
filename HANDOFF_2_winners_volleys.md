@@ -190,3 +190,44 @@ regression check nearly reverted this on a false "77%→58%" result, caused by
 comparing against the documented baseline using a different metric than
 produced it (see `player-tracking-works-on-real-footage` in project memory
 if using Claude Code — the same trap is easy to repeat).
+
+## Correction — 2026-08-30, after brief 4
+
+**T5's recorded root cause was wrong.** The five-rally ceiling was named as the
+reason for held-out 0.10/0.22, with the note that "no further labelling within
+them can fix" it. Labelling *outside* them has since happened — `labels.json` is
+now 174 marks across 20 rally clusters spanning the whole video — and the same
+command over t=0–596 scores **held-out precision 0.03, recall 0.17** (18
+rallies, 140 shots, 102 of 173 marks matched, fitted-on-everything 0.00/0.00).
+
+More labels made it worse, so label quantity was never the binding constraint.
+The blocker is `interval_norm`, computed across two *detected* shots: it scores
+r = −0.205 against the volley label from hand-marked instants and −0.010 from
+detected ones, on identical labels and footage. `depth_short` and `depth_median`
+are additionally collinear at r = 0.97, so the four features were really two,
+and one of the two was destroyed upstream. Full comparison in
+`HANDOFF_4_shot_type.md` S3.
+
+Do not read this as "volleys are not detectable from position and timing." That
+question is still open. This is a measurement of the feature pipeline, not of
+squash.
+
+**T5's feature set has since been rebuilt** on that finding. `depth_median` was
+dropped (r = 0.97 with `depth_short`, no separate information, sign flips in
+the multivariate fit) and `forward_vy` dropped (+0.063 on detected instants,
+−0.015 on hand-marked — not a stable sign). Added in their place: `radial_v`
+and `out_reach`, describing the shape of the striker's excursion, which measured
+as the two strongest predictors available (−0.391 and −0.369 against −0.245 for
+`depth_short`). Scoring also changed — held-out predictions are pooled across
+folds and reported as average precision against the base rate, because
+precision/recall at a 0.5 threshold is near-meaningless on a 12% class and the
+old per-fold average scored an abstaining fold as if it were wrong.
+
+Result on the shipped path (detected instants, full video): **AP 0.130 → 0.174**
+against a 0.11 floor. Real but modest, and the bootstrap interval [0.081, 0.319]
+overlaps the old figure — directional, not established.
+
+Measured and rejected, so they are not retried: every opponent-derived feature
+(|r| ≤ 0.17; AP 0.165 alone) and the incoming ball path reconstructed from the
+opponent's last radial apex (|r| ≤ 0.15; AP 0.202 alone). Squash is a two-body
+game, but volleys, measured here, are not a two-body signal.
